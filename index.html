@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>모던 화이트 단어장</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-white: #ffffff;
+            --text-dark: #1d1d1f;
+            --text-gray: #86868b;
+            --border-color: #f2f2f2;
+            --input-bg: #f5f5f7;
+            --accent-blue: #0071e3;
+            --card-radius: 18px;
+            --status-pink: #ff3b30;
+            --status-sky: #64d2ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Pretendard', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-white);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 70px 0 90px 0; /* 하단 패딩 넉넉하게 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- 상단바 스타일 --- */
+        .top-bar {
+            position: fixed; top: 0; width: 100%; max-width: 600px;
+            height: 60px; background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            display: flex; align-items: center; padding: 0 16px;
+            border-bottom: 1px solid var(--border-color); z-index: 2000;
+            gap: 12px;
+        }
+
+        .search-container {
+            flex: 1; height: 38px; background: var(--input-bg); 
+            border-radius: 10px; 
+            display: flex; align-items: center; padding: 0 12px;
+            overflow: hidden; /* 내부 넘침 방지 */
+        }
+
+        .search-input {
+            border: none; background: transparent; width: 100%;
+            height: 100%; padding: 0; font-size: 15px; color: var(--text-dark);
+            /* 모달 인풋 스타일 초기화 */
+            border-radius: 0; 
+        }
+
+        .top-btn {
+            width: 38px; height: 38px; border-radius: 10px; 
+            border: none; background: var(--input-bg);
+            color: var(--text-dark); font-size: 22px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: background 0.2s;
+        }
+        .top-btn:active { background: #e8e8ed; }
+        .top-btn.export { font-size: 13px; font-weight: 500; width: auto; padding: 0 12px; display: none; }
+
+        /* --- 하단 내비게이션 (둥근 모서리) --- */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; max-width: 600px;
+            height: 70px; 
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 2000;
+            border-radius: 24px 24px 0 0; /* 위쪽 모서리 둥글게 */
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            padding-bottom: 10px;
+        }
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            cursor: pointer; color: var(--text-gray); font-size: 11px; font-weight: 500;
+            transition: color 0.2s; padding: 10px;
+        }
+        .nav-item.active { color: var(--text-dark); }
+
+        /* --- 컨텐츠 --- */
+        .container { width: 100%; max-width: 550px; padding: 16px; }
+        
+        .page { 
+            display: none; opacity: 0; transform: translateY(10px); 
+            transition: opacity 0.3s ease, transform 0.3s ease; 
+        }
+        .page.active { display: block; } 
+        .page.show { opacity: 1; transform: translateY(0); }
+
+        /* --- 카드 디자인 --- */
+        .card {
+            background: white; padding: 20px; border-radius: var(--card-radius);
+            border: 1px solid var(--border-color);
+            margin-bottom: 14px; position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: transform 0.2s; overflow: hidden;
+        }
+        .card:active { transform: scale(0.98); }
+        .card h3 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+        .card p { margin: 6px 0 0; font-size: 0.85rem; color: var(--text-gray); }
+        
+        .word-eng { font-weight: 700; font-size: 1.2rem; margin-bottom: 6px; display: block; color: var(--text-dark); transition: opacity 0.2s; }
+        .word-kor { color: var(--text-gray); font-size: 1rem; line-height: 1.4; transition: opacity 0.2s; display: block; }
+
+        .masked {
+            background-color: #f0f0f5; color: transparent !important;
+            border-radius: 6px; user-select: none;
+        }
+
+        .more-btn {
+            position: absolute; top: 20px; right: 16px;
+            border: none; background: none; color: var(--accent-blue);
+            cursor: pointer; font-size: 0.8rem; font-weight: 500;
+        }
+
+        /* --- 상태 아이콘 --- */
+        .status-icon {
+            position: absolute; top: 16px; right: 16px;
+            width: 18px; height: 18px; 
+            cursor: pointer; transition: transform 0.2s, filter 0.2s;
+            z-index: 10;
+        }
+        .status-icon:active { transform: scale(0.8); }
+
+        .status-0 { filter: grayscale(100%) opacity(0.2); }
+        .status-1 { filter: invert(34%) sepia(68%) saturate(3089%) hue-rotate(338deg) brightness(102%) contrast(106%); }
+        .status-2 { filter: invert(73%) sepia(34%) saturate(1450%) hue-rotate(186deg) brightness(101%) contrast(101%); }
+
+        .progress-container {
+            margin-top: 12px; width: 100%; height: 6px;
+            background-color: var(--input-bg); border-radius: 3px; overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%; background-color: var(--status-sky); width: 0%;
+            transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* --- 모달 및 폼 스타일 (수정됨) --- */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; display: none; flex-direction: column;
+            z-index: 3000; padding: 24px;
+            opacity: 0; transform: scale(0.95);
+            transition: opacity 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            overflow-y: auto;
+        }
+        .modal.open { opacity: 1; transform: scale(1); }
+
+        .modal-header { display: flex; align-items: center; margin-bottom: 24px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; margin-bottom: 8px; font-weight: 600; color: var(--text-gray); }
+        
+        /* [중요] 모달 내 입력창에만 스타일 적용 */
+        .input-group input[type="text"], .meaning-row input[type="text"] {
+            width: 100%; padding: 14px; border-radius: 12px;
+            border: 1px solid var(--border-color); font-size: 16px; background: var(--input-bg);
+        }
+
+        .meaning-row { display: flex; gap: 8px; margin-bottom: 8px; }
+        .meaning-row input { flex: 1; }
+        .btn-remove {
+            width: 46px; border-radius: 12px; border: none;
+            background: #ffe5e5; color: #ff3b30; font-size: 18px; cursor: pointer;
+        }
+
+        .btn-full {
+            width: 100%; padding: 16px; border-radius: 14px; border: none;
+            background: var(--text-dark); color: white; font-weight: 600;
+            margin-top: 10px; cursor: pointer; font-size: 15px;
+        }
+        .btn-sub { background: var(--input-bg); color: var(--text-dark); }
+        .btn-add-meaning {
+            width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--text-gray); 
+            background: white; color: var(--text-gray); margin-bottom: 10px; cursor: pointer;
+        }
+        .btn-find { background: transparent; color: var(--accent-blue); border: 1px solid var(--accent-blue); margin-top: 8px; font-size: 13px; padding: 10px; }
+
+        #backBtn { display: none; font-size: 18px; font-weight: bold; }
+
+        /* --- FAB & Bottom Sheet --- */
+        .fab-container {
+            position: fixed; bottom: 90px; right: 20px;
+            z-index: 2100; display: none;
+        }
+        .fab-btn {
+            width: 44px; height: 44px;
+            background: white; border-radius: 50%;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: none;
+            font-size: 20px; color: var(--text-dark);
+            transition: transform 0.2s;
+        }
+        .fab-btn:active { transform: scale(0.9); }
+
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 3500;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        .overlay.active { opacity: 1; pointer-events: auto; }
+
+        .bottom-sheet {
+            position: fixed; bottom: 0; left: 0; right: 0; width: 100%;
+            background: white; z-index: 4000;
+            border-radius: 24px 24px 0 0;
+            padding: 24px 24px 40px 24px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            max-width: 600px; margin: 0 auto;
+        }
+        .bottom-sheet.active { transform: translateY(0); }
+
+        .sheet-header {
+            font-size: 18px; font-weight: 700; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .sheet-section-title {
+            font-size: 13px; font-weight: 600; color: var(--text-gray); margin-bottom: 12px; margin-top: 20px;
+        }
+        .chip-container { display: flex; gap: 10px; flex-wrap: wrap; }
+        .chip {
+            padding: 10px 16px; border-radius: 20px;
+            background: var(--input-bg); border: none;
+            font-size: 14px; font-weight: 500; color: var(--text-dark);
+            cursor: pointer; transition: background 0.2s, color 0.2s;
+            border: 1px solid transparent;
+        }
+        .chip.selected {
+            background: var(--text-dark); color: white;
+            border-color: var(--text-dark);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button id="backBtn" class="top-btn" onclick="closeVocabDetail()">‹</button>
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="검색" oninput="handleSearch()">
+        </div>
+        <button id="exportBtnTop" class="top-btn export" onclick="exportDocFromTop()">내보내기</button>
+        <button id="addBtnTop" class="top-btn" onclick="handleTopPlus()">+</button>
+    </div>
+
+    <div class="container">
+        <div id="tab-voca" class="page active show">
+            <button class="btn-full btn-sub" style="margin-bottom:20px; border-radius: 12px;" onclick="document.getElementById('fileInput').click()">파일 불러오기</button>
+            <input type="file" id="fileInput" accept=".doc,.json" style="display:none" onchange="handleImport(event)">
+            <div id="vocabList"></div>
+        </div>
+
+        <div id="voca-detail" class="page">
+            <div id="wordContainer"></div>
+        </div>
+
+        <div id="tab-friends" class="page" style="text-align:center; margin-top:100px; color:var(--text-gray);">준비 중인 기능입니다.</div>
+        <div id="tab-settings" class="page" style="text-align:center; margin-top:100px; color:var(--text-gray);">설정</div>
+    </div>
+
+    <div id="fabContainer" class="fab-container">
+        <button class="fab-btn" onclick="openBottomSheet()">•••</button>
+    </div>
+
+    <div id="menuOverlay" class="overlay" onclick="closeBottomSheet()"></div>
+    <div id="bottomSheet" class="bottom-sheet">
+        <div class="sheet-header">
+            <span>보기 설정</span>
+            <button onclick="closeBottomSheet()" style="border:none; background:none; font-size:16px; color:var(--accent-blue); font-weight:600;">완료</button>
+        </div>
+
+        <div class="sheet-section-title">보기 필터 (중복 선택)</div>
+        <div class="chip-container">
+            <button class="chip selected" id="filter-all" onclick="toggleFilter('all')">전체</button>
+            <button class="chip" id="filter-2" onclick="toggleFilter(2)">암기 (하늘색)</button>
+            <button class="chip" id="filter-1" onclick="toggleFilter(1)">미암기 (핑크색)</button>
+            <button class="chip" id="filter-0" onclick="toggleFilter(0)">해당없음 (회색)</button>
+        </div>
+
+        <div class="sheet-section-title">가리기 모드</div>
+        <div class="chip-container">
+            <button class="chip selected" id="mask-none" onclick="setMasking('none')">해제</button>
+            <button class="chip" id="mask-word" onclick="setMasking('word')">단어 가리기</button>
+            <button class="chip" id="mask-meaning" onclick="setMasking('meaning')">뜻 가리기</button>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('voca', this)">단어장</div>
+        <div class="nav-item" onclick="switchTab('friends', this)">친구</div>
+        <div class="nav-item" onclick="switchTab('settings', this)">설정</div>
+    </div>
+
+    <div id="vocabForm" class="modal">
+        <div class="modal-header"><h3 style="margin:0">단어장 정보</h3></div>
+        <div class="input-group"><label>이름</label><input type="text" id="v_name"></div>
+        <button class="btn-full" onclick="saveVocab()">완료</button>
+        <button class="btn-full btn-sub" id="delVocabBtn" style="color:#ff3b30; display:none;" onclick="deleteVocab()">삭제</button>
+        <button class="btn-full btn-sub" onclick="closeModalWithAnim('vocabForm')">취소</button>
+    </div>
+
+    <div id="wordForm" class="modal">
+        <div class="modal-header"><h3 style="margin:0">단어 추가/수정</h3></div>
+        <div class="input-group">
+            <label>영어</label>
+            <input type="text" id="w_word" placeholder="영단어">
+            <button class="btn-full btn-find" id="findBtn" onclick="fetchMeaning()">뜻 자동 완성</button>
+        </div>
+        
+        <div class="input-group">
+            <label>뜻</label>
+            <div id="meaningsContainer"></div>
+            <button class="btn-add-meaning" onclick="addMeaningInput()">+ 뜻 추가</button>
+        </div>
+
+        <button class="btn-full" onclick="saveWord()">저장</button>
+        <button class="btn-full btn-sub" id="delWordBtn" style="color:#ff3b30; display:none;" onclick="deleteWord()">삭제</button>
+        <button class="btn-full btn-sub" onclick="closeModalWithAnim('wordForm')">취소</button>
+    </div>
+
+    <script>
+        let savedVocabs = JSON.parse(localStorage.getItem('myVocabs') || '[]');
+        let currentVocabIdx = -1;
+        let currentWordIdx = -1;
+        let isDetailView = false;
+        let maskingMode = 'none'; 
+        let activeFilters = new Set(['all']); 
+
+        function openModalWithAnim(id) {
+            const el = document.getElementById(id);
+            el.style.display = 'flex';
+            void el.offsetWidth; 
+            el.classList.add('open');
+        }
+
+        function closeModalWithAnim(id) {
+            const el = document.getElementById(id);
+            el.classList.remove('open');
+            setTimeout(() => { el.style.display = 'none'; }, 250); 
+        }
+
+        function switchPageWithAnim(hideId, showId) {
+            const hideEl = document.getElementById(hideId);
+            const showEl = document.getElementById(showId);
+            hideEl.classList.remove('show');
+            setTimeout(() => {
+                hideEl.classList.remove('active');
+                showEl.classList.add('active');
+                void showEl.offsetWidth;
+                showEl.classList.add('show');
+            }, 300);
+        }
+
+        function openBottomSheet() {
+            document.getElementById('menuOverlay').classList.add('active');
+            document.getElementById('bottomSheet').classList.add('active');
+            updateSheetUI();
+        }
+
+        function closeBottomSheet() {
+            document.getElementById('menuOverlay').classList.remove('active');
+            document.getElementById('bottomSheet').classList.remove('active');
+        }
+
+        function updateSheetUI() {
+            document.querySelectorAll('.chip-container .chip').forEach(c => c.classList.remove('selected'));
+            activeFilters.forEach(f => {
+                const el = document.getElementById('filter-' + f);
+                if(el) el.classList.add('selected');
+            });
+            document.getElementById('mask-' + maskingMode).classList.add('selected');
+        }
+
+        function toggleFilter(filter) {
+            if (filter === 'all') {
+                activeFilters.clear();
+                activeFilters.add('all');
+            } else {
+                if (activeFilters.has('all')) activeFilters.delete('all');
+                if (activeFilters.has(filter)) activeFilters.delete(filter);
+                else activeFilters.add(filter);
+                if (activeFilters.size === 0) activeFilters.add('all');
+            }
+            updateSheetUI();
+            renderWords();
+        }
+
+        function setMasking(mode) {
+            maskingMode = mode;
+            updateSheetUI();
+            renderWords();
+        }
+
+        function renderList() {
+            const listDiv = document.getElementById('vocabList');
+            listDiv.innerHTML = '';
+            savedVocabs.forEach((v, idx) => {
+                const total = v.corpusList.length;
+                const memorized = v.corpusList.filter(w => w.status === 2).length;
+                const percent = total === 0 ? 0 : Math.round((memorized / total) * 100);
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div onclick="openVocabDetail(${idx})">
+                        <h3>${v.vocabulary.name}</h3>
+                        <p>총 ${total}단어 · 암기 ${percent}%</p>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                    <button class="more-btn" onclick="openVocabForm(${idx})">관리</button>
+                `;
+                listDiv.appendChild(card);
+            });
+        }
+
+        function handleTopPlus() {
+            if (isDetailView) openWordForm();
+            else openVocabForm();
+        }
+
+        function openVocabDetail(idx) {
+            currentVocabIdx = idx;
+            isDetailView = true;
+            activeFilters.clear(); activeFilters.add('all');
+            maskingMode = 'none';
+            switchPageWithAnim('tab-voca', 'voca-detail');
+            document.getElementById('backBtn').style.display = 'flex';
+            document.getElementById('exportBtnTop').style.display = 'flex';
+            document.getElementById('fabContainer').style.display = 'flex';
+            renderWords();
+        }
+
+        function renderWords() {
+            const container = document.getElementById('wordContainer');
+            container.innerHTML = '';
+            const v = savedVocabs[currentVocabIdx];
+            let hasWord = false;
+
+            v.corpusList.forEach((w, wIdx) => {
+                const status = w.status !== undefined ? w.status : 0;
+                if (!activeFilters.has('all') && !activeFilters.has(status)) return;
+                
+                hasWord = true;
+                let displayMeaning = Array.isArray(w.meaning) ? w.meaning.join(', ') : w.meaning;
+
+                const wordClass = maskingMode === 'word' ? 'word-eng masked' : 'word-eng';
+                const meanClass = maskingMode === 'meaning' ? 'word-kor masked' : 'word-kor';
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div style="padding-right: 40px;">
+                        <span class="${wordClass}" onclick="this.classList.remove('masked')">${w.word}</span>
+                        <span class="${meanClass}" onclick="this.classList.remove('masked')">${displayMeaning}</span>
+                    </div>
+                    <img src="https://marketplace.canva.com/tm_ps/MAGmpxtm_ps/1/tl/canva-monochrome-icon-check-mark-MAGmpxtm_ps.png" 
+                         class="status-icon status-${status}" 
+                         onclick="toggleStatus(${wIdx}, this)">
+                    <button class="more-btn" style="top:auto; bottom:20px;" onclick="openWordForm(${wIdx})">편집</button>
+                `;
+                container.appendChild(card);
+            });
+
+            if(!hasWord) container.innerHTML = `<div style="text-align:center; color:var(--text-gray); margin-top:50px;">해당하는 단어가 없습니다.</div>`;
+        }
+
+        function toggleStatus(wIdx, imgEl) {
+            const v = savedVocabs[currentVocabIdx];
+            let currentStatus = v.corpusList[wIdx].status || 0;
+            let nextStatus = currentStatus === 0 ? 1 : (currentStatus === 1 ? 2 : 0);
+
+            v.corpusList[wIdx].status = nextStatus;
+            saveAndRefresh(false);
+            
+            if(!activeFilters.has('all')) renderWords();
+            else imgEl.className = `status-icon status-${nextStatus}`;
+        }
+
+        function closeVocabDetail() {
+            isDetailView = false; maskingMode = 'none';
+            closeBottomSheet();
+            switchPageWithAnim('voca-detail', 'tab-voca');
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('exportBtnTop').style.display = 'none';
+            document.getElementById('fabContainer').style.display = 'none';
+            renderList();
+        }
+
+        function openVocabForm(idx = -1) {
+            currentVocabIdx = idx;
+            document.getElementById('delVocabBtn').style.display = idx > -1 ? 'block' : 'none';
+            document.getElementById('v_name').value = idx > -1 ? savedVocabs[idx].vocabulary.name : '';
+            openModalWithAnim('vocabForm');
+        }
+
+        function saveVocab() {
+            const name = document.getElementById('v_name').value;
+            if(!name) return;
+            if(currentVocabIdx > -1) savedVocabs[currentVocabIdx].vocabulary.name = name;
+            else savedVocabs.push({vocabulary:{name:name}, corpusList:[]});
+            saveAndRefresh(); closeModalWithAnim('vocabForm');
+        }
+
+        function deleteVocab() {
+            if(confirm('이 단어장을 삭제할까요?')) {
+                savedVocabs.splice(currentVocabIdx, 1);
+                saveAndRefresh(); closeModalWithAnim('vocabForm');
+            }
+        }
+
+        function addMeaningInput(val = '') {
+            const container = document.getElementById('meaningsContainer');
+            const div = document.createElement('div');
+            div.className = 'meaning-row';
+            div.innerHTML = `
+                <input type="text" class="meaning-input" placeholder="뜻" value="${val}">
+                <button class="btn-remove" onclick="this.parentElement.remove()">-</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function openWordForm(wIdx = -1) {
+            currentWordIdx = wIdx;
+            document.getElementById('delWordBtn').style.display = wIdx > -1 ? 'block' : 'none';
+            const container = document.getElementById('meaningsContainer');
+            container.innerHTML = ''; 
+
+            if(wIdx > -1) {
+                const w = savedVocabs[currentVocabIdx].corpusList[wIdx];
+                document.getElementById('w_word').value = w.word;
+                let meanings = Array.isArray(w.meaning) ? w.meaning : (w.meaning ? [w.meaning] : []);
+                if(meanings.length > 0) meanings.forEach(m => addMeaningInput(m));
+                else addMeaningInput();
+            } else {
+                document.getElementById('w_word').value = '';
+                addMeaningInput();
+            }
+            openModalWithAnim('wordForm');
+        }
+
+        async function fetchMeaning() {
+            const word = document.getElementById('w_word').value;
+            if(!word) return;
+            const btn = document.getElementById('findBtn');
+            btn.innerText = '검색 중...';
+            try {
+                const res = await fetch(`https://api.mymemory.translated.net/get?q=${word}&langpair=en|ko`);
+                const data = await res.json();
+                const inputs = document.getElementsByClassName('meaning-input');
+                if(inputs.length > 0) inputs[0].value = data.responseData.translatedText;
+                else addMeaningInput(data.responseData.translatedText);
+            } catch(e) { alert('검색 실패'); }
+            btn.innerText = '뜻 자동 완성';
+        }
+
+        function saveWord() {
+            const word = document.getElementById('w_word').value;
+            const meaningInputs = document.querySelectorAll('.meaning-input');
+            const meanings = [];
+            meaningInputs.forEach(input => { if(input.value.trim()) meanings.push(input.value.trim()); });
+
+            if(!word || meanings.length === 0) { alert('단어와 최소 하나의 뜻을 입력해주세요.'); return; }
+            
+            let existingStatus = 0;
+            if(currentWordIdx > -1) existingStatus = savedVocabs[currentVocabIdx].corpusList[currentWordIdx].status || 0;
+
+            const newWordObj = {word, meaning: meanings, status: existingStatus};
+
+            if(currentWordIdx > -1) savedVocabs[currentVocabIdx].corpusList[currentWordIdx] = newWordObj;
+            else savedVocabs[currentVocabIdx].corpusList.push(newWordObj);
+            
+            saveAndRefresh(false); renderWords(); closeModalWithAnim('wordForm');
+        }
+
+        function deleteWord() {
+            savedVocabs[currentVocabIdx].corpusList.splice(currentWordIdx, 1);
+            saveAndRefresh(false); renderWords(); closeModalWithAnim('wordForm');
+        }
+
+        function saveAndRefresh(shouldRenderList = true) {
+            localStorage.setItem('myVocabs', JSON.stringify(savedVocabs));
+            if(shouldRenderList) renderList();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const match = e.target.result.match(/\{.*\}/s);
+                if(match) {
+                    const data = JSON.parse(match[0]);
+                    data.corpusList = data.corpusList.map(i => ({...i, status: i.status || 0}));
+                    savedVocabs.push(data);
+                    saveAndRefresh();
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function exportDocFromTop() {
+            const data = savedVocabs[currentVocabIdx];
+            const blob = new Blob([`${JSON.stringify(data, null, 2)}`], {type: 'application/msword'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `${data.vocabulary.name}.doc`; a.click();
+        }
+
+        function switchTab(tab, el) {
+            const currentTab = document.querySelector('.page.active');
+            const targetTabId = 'tab-' + tab;
+            if(currentTab && currentTab.id === targetTabId) return;
+            if (isDetailView) closeVocabDetail();
+            if (currentTab) switchPageWithAnim(currentTab.id, targetTabId);
+            else document.getElementById(targetTabId).classList.add('active', 'show');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function handleSearch() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.card').forEach(el => {
+                el.style.display = el.innerText.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+
+        renderList();
+    </script>
+</body>
+</html>
