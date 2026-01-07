@@ -38,6 +38,17 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: padding-top 0.3s ease;
+        }
+
+        /* 친구 모드: 상단바 숨김, 패딩 제거, 스크롤 방지 */
+        body.friends-mode {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important; /* 하단 패딩도 제거 */
+            overflow: hidden !important; 
+            height: 100vh; 
+            width: 100%;
+            position: fixed; /* 화면 고정 */
         }
 
         /* 로딩 오버레이 */
@@ -76,6 +87,11 @@
             display: flex; align-items: center; padding: 0 16px;
             border-bottom: 1px solid var(--border-color); z-index: 2000;
             gap: 12px;
+            transition: transform 0.3s ease;
+        }
+        
+        .top-bar.hide-bar {
+            transform: translateY(-100%);
         }
 
         .top-logo {
@@ -171,13 +187,49 @@
         .nav-item.active .icon-settings span { background-color: var(--text-dark); }
 
         /* --- 컨텐츠 영역 --- */
-        .container { width: 100%; max-width: 550px; padding: 16px; }
+        .container { 
+            width: 100%; max-width: 550px; padding: 16px; 
+            transition: padding 0.3s;
+        }
+        
+        /* 친구 모드: 컨테이너 여백 제거, 스크롤 방지, 전체화면 */
+        .container.friends-mode {
+            padding: 0;
+            max-width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
         .page { 
             display: none; opacity: 0; transform: translateY(10px); 
             transition: opacity 0.3s ease, transform 0.3s ease; 
         }
         .page.active { display: block; } 
         .page.show { opacity: 1; transform: translateY(0); }
+        
+        /* [수정] 채팅 탭: position fixed로 하단바 위까지만 오도록 강제 고정 */
+        #tab-friends {
+            position: fixed; /* 뷰포트 기준 고정 */
+            top: 0; 
+            left: 0; 
+            width: 100%;
+            /* 하단바 높이(80px)를 뺀 나머지 공간만 차지하도록 설정 */
+            bottom: 80px; 
+            height: auto; /* bottom 속성으로 높이 결정 */
+            z-index: 1000; /* 하단바(2000)보다 아래, 내용물보다는 위 */
+            background: white;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .chat-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            overflow: hidden;
+        }
 
         /* --- 단어장 카드 --- */
         .card-book {
@@ -274,28 +326,16 @@
             border: 1px solid var(--border-color); font-size: 16px; background: var(--input-bg);
         }
         
-        /* [수정] 단어 뜻 입력 row 스타일 (정렬 및 높이 맞춤) */
-        .meaning-row { 
-            display: flex; gap: 8px; margin-bottom: 8px; align-items: center; 
-        }
-        .meaning-row input { 
-            flex: 1; height: 48px; /* 버튼과 높이 맞춤 */
-        }
+        .meaning-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+        .meaning-row input { flex: 1; height: 48px; }
 
-        /* [수정] 단어 뜻 삭제 버튼 스타일 (둥근 정사각형) */
         .btn-remove { 
-            width: 48px; height: 48px; /* 정사각형 */
-            border-radius: 12px; /* 둥근 모서리 */
-            border: none; 
-            background: #ffe5e5; color: #ff3b30; 
-            font-size: 20px; font-weight: bold;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            width: 48px; height: 48px; border-radius: 12px; border: none; 
+            background: #ffe5e5; color: #ff3b30; font-size: 20px; font-weight: bold;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         .btn-remove:active { opacity: 0.7; }
 
-        /* [유지] 기타 버튼 스타일 */
         .btn-full { 
             width: 100%; padding: 16px; border-radius: 14px; 
             border: none; background: var(--text-dark); color: white; 
@@ -411,7 +451,9 @@
             <div id="wordContainer"></div>
         </div>
 
-        <div id="tab-friends" class="page" style="text-align:center; margin-top:100px; color:var(--text-gray);">준비 중인 기능입니다.</div>
+        <div id="tab-friends" class="page">
+            <iframe id="chatIframe" class="chat-frame" scrolling="no"></iframe>
+        </div>
         
         <div id="tab-settings" class="page">
             <div class="settings-container">
@@ -906,30 +948,25 @@
             reader.readAsText(file);
         }
 
-        // [수정] 공유 로직 개선
         async function handleExportAction(type) {
             closeAllBottomSheets();
             const data = savedVocabs[contextVocabIdx];
             const content = JSON.stringify(data, null, 2);
-            // .doc 대신 .txt 사용 권장 (모바일 공유 호환성)
-            const fileName = `${data.vocabulary.name}.txt`;
+            const fileName = `${data.vocabulary.name}.txt`; // 호환성을 위해 .txt
 
             if (type === 'save') {
-                // 저장 시에는 확장자 자유로움 (.doc 유지해도 무방하나 통일성 위해)
                 const blob = new Blob([content], {type: 'text/plain'});
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url; a.download = `${data.vocabulary.name}.doc`; // 저장은 .doc으로 유지
+                a.href = url; a.download = `${data.vocabulary.name}.doc`; // 저장은 .doc 권장
                 a.click();
             } else if (type === 'share') {
                 if (!window.isSecureContext) {
                     alert('공유 기능은 보안 연결(HTTPS) 또는 localhost에서만 작동합니다.\n현재 환경에서는 "파일로 저장"을 이용해주세요.');
                     return;
                 }
-                
                 try {
                     const blob = new Blob([content], {type: 'text/plain'});
-                    // 공유 시에는 호환성 위해 .txt 확장자 사용
                     const file = new File([blob], fileName, { type: 'text/plain' });
 
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -939,16 +976,12 @@
                             text: '단어장 파일입니다.'
                         });
                     } else {
-                        // 파일 공유 미지원 시 텍스트 복사 폴백
                         await navigator.clipboard.writeText(content);
                         alert('이 기기/브라우저는 파일 공유를 지원하지 않습니다.\n데이터가 클립보드에 복사되었습니다.');
                     }
                 } catch (error) {
                     console.error('Sharing failed', error);
-                    // 사용자가 취소했을 수 있으므로 에러 메시지는 신중하게
-                    if (error.name !== 'AbortError') {
-                        alert('공유에 실패했습니다. "파일로 저장"을 이용해주세요.');
-                    }
+                    if (error.name !== 'AbortError') alert('공유에 실패했습니다. "파일로 저장"을 이용해주세요.');
                 }
             }
         }
@@ -957,14 +990,30 @@
             const currentTab = document.querySelector('.page.active');
             const targetTabId = 'tab-' + tab;
             
+            // 애니메이션
             document.querySelectorAll('.nav-item').forEach(n => {
                 n.classList.remove('active');
                 n.classList.remove('animate');
             });
             el.classList.add('active');
-            
             void el.offsetWidth; 
             el.classList.add('animate');
+
+            // 친구 탭 특별 처리
+            const topBar = document.querySelector('.top-bar');
+            const container = document.querySelector('.container');
+            const iframe = document.getElementById('chatIframe');
+
+            if (tab === 'friends') {
+                topBar.classList.add('hide-bar');
+                document.body.classList.add('friends-mode');
+                container.classList.add('friends-mode');
+                if(!iframe.src) iframe.src = "https://wordvoca.kro.kr/chat";
+            } else {
+                topBar.classList.remove('hide-bar');
+                document.body.classList.remove('friends-mode');
+                container.classList.remove('friends-mode');
+            }
 
             if(currentTab && currentTab.id === targetTabId) return;
             if (isDetailView) closeVocabDetail();
