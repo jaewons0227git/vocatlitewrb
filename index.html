@@ -56,7 +56,7 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* [추가] 토스트 알림 스타일 */
+        /* 토스트 알림 */
         .toast {
             position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.8); color: white;
@@ -68,30 +68,6 @@
         }
         .toast.show { opacity: 1; }
 
-
-
-        /* 🔽 🔽 🔽 🔽 🔽 🔽 🔽 🔽 */
-        /* [추가] 모바일 버튼 UI 깨짐 방지 전용 CSS */
-        button,
-        .btn-full,
-        .btn-sub,
-        .btn-add-meaning,
-        .btn-find,
-        .btn-remove {
-            -webkit-appearance: none;
-            appearance: none;
-            box-sizing: border-box;
-            line-height: 1.2;
-            outline: none;
-            border-radius: inherit;
-        }
-
-        button:focus {
-            outline: none;
-        }
-        /* 🔼 🔼 🔼 🔼 🔼 🔼 🔼 🔼 */
-
-        
         /* --- 상단바 --- */
         .top-bar {
             position: fixed; top: 0; width: 100%; max-width: 600px;
@@ -128,7 +104,6 @@
         }
         .top-btn:active { background: #e8e8ed; }
         
-        /* [수정] 뒤로가기 버튼 초기 숨김 (display:none) */
         #backBtn { display: none; }
         #exportBtnTop { display: none; font-size: 13px; font-weight: 500; width: auto; padding: 0 12px; }
 
@@ -165,12 +140,11 @@
         .nav-item.active .icon-voca { background-color: var(--icon-blue); }
         .nav-item.active .icon-friends, .nav-item.active .icon-settings { background-color: var(--text-dark); }
 
-        /* [수정] 쫀득하고 부드러운 애니메이션 (JS로 클래스 토글) */
         @keyframes jelly-soft {
             0% { transform: scale(1); }
-            30% { transform: scale(1.15); } /* 살짝 커짐 */
-            50% { transform: scale(0.95); } /* 살짝 작아짐 */
-            70% { transform: scale(1.05); } /* 반동 */
+            30% { transform: scale(1.15); } 
+            50% { transform: scale(0.95); } 
+            70% { transform: scale(1.05); } 
             100% { transform: scale(1); }
         }
         
@@ -281,7 +255,7 @@
         .status-check.checked-2 { background-color: var(--status-vivid-blue); }
         .status-check::after { display: none; }
 
-        /* --- 모달 및 폼 --- */
+        /* --- 모달 및 폼 스타일 --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; display: none; flex-direction: column;
@@ -299,11 +273,43 @@
             width: 100%; padding: 14px; border-radius: 12px;
             border: 1px solid var(--border-color); font-size: 16px; background: var(--input-bg);
         }
-        .btn-remove { background: #ffe5e5; color: #ff3b30; }
-        .btn-full { width: 100%; padding: 16px; border-radius: 14px; background: var(--text-dark); color: white; margin-top: 10px; cursor: pointer; }
-        .btn-sub { background: var(--input-bg); color: var(--text-dark); }
-        .btn-add-meaning { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--text-gray); background: white; margin-bottom: 10px; }
-        .btn-find { background: transparent; color: var(--accent-blue); border: 1px solid var(--accent-blue); margin-top: 8px; }
+        
+        /* [수정] 단어 뜻 입력 row 스타일 (정렬 및 높이 맞춤) */
+        .meaning-row { 
+            display: flex; gap: 8px; margin-bottom: 8px; align-items: center; 
+        }
+        .meaning-row input { 
+            flex: 1; height: 48px; /* 버튼과 높이 맞춤 */
+        }
+
+        /* [수정] 단어 뜻 삭제 버튼 스타일 (둥근 정사각형) */
+        .btn-remove { 
+            width: 48px; height: 48px; /* 정사각형 */
+            border-radius: 12px; /* 둥근 모서리 */
+            border: none; 
+            background: #ffe5e5; color: #ff3b30; 
+            font-size: 20px; font-weight: bold;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .btn-remove:active { opacity: 0.7; }
+
+        /* [유지] 기타 버튼 스타일 */
+        .btn-full { 
+            width: 100%; padding: 16px; border-radius: 14px; 
+            border: none; background: var(--text-dark); color: white; 
+            font-weight: 600; margin-top: 10px; cursor: pointer; font-size: 15px; 
+        }
+        .btn-sub { background: var(--input-bg); color: var(--text-dark); border: none; }
+        .btn-add-meaning { 
+            width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--text-gray); 
+            background: white; color: var(--text-gray); margin-bottom: 10px; cursor: pointer; 
+        }
+        .btn-find { 
+            background: transparent; color: var(--accent-blue); 
+            border: 1px solid var(--accent-blue); margin-top: 8px; 
+        }
 
         /* --- FAB & Bottom Sheet --- */
         .fab-container {
@@ -332,7 +338,6 @@
             border-radius: 24px 24px 0 0;
             padding: 24px 24px 40px 24px;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-            /* [수정] 완전히 숨기기 위해 translateY 값 증가 */
             transform: translateY(120%);
             transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
             max-width: 600px; margin: 0 auto;
@@ -378,49 +383,6 @@
         .app-version { font-size: 14px; color: var(--text-gray); font-family: monospace; }
         .app-author { font-size: 13px; color: #b0b0b5; margin-top: 6px; }
 
-
-
-        /* ===============================
-   [추가] 특정 버튼 모바일 강제 스타일 보정
-   =============================== */
-
-/* 취소 / 저장 / 삭제 계열 버튼 */
-.btn-full,
-.btn-sub,
-button.btn-full,
-button.btn-sub {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    border-radius: 16px !important;
-}
-
-/* 제거(가운데 일직선 아이콘) 버튼 */
-.btn-remove,
-button.btn-remove,
-input.btn-remove,
-input[type="button"].btn-remove {
-    -webkit-appearance: none !important;
-    appearance: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    border-radius: 50% !important;
-    background-clip: padding-box !important;
-}
-
-/* 모바일 포커스/탭 하이라이트 제거 */
-button:focus,
-input:focus {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-button::-moz-focus-inner {
-    border: 0;
-}
-
-        
     </style>
 </head>
 <body>
@@ -441,7 +403,7 @@ button::-moz-focus-inner {
 
     <div class="container">
         <div id="tab-voca" class="page active show">
-            <input type="file" id="fileInput" accept=".doc,.json" style="display:none" onchange="handleImport(event)">
+            <input type="file" id="fileInput" accept=".doc,.json,.txt" style="display:none" onchange="handleImport(event)">
             <div id="vocabList"></div>
         </div>
 
@@ -484,8 +446,7 @@ button::-moz-focus-inner {
             <button class="chip" id="mask-word" onclick="setMasking('word')">단어 가리기</button>
             <button class="chip" id="mask-meaning" onclick="setMasking('meaning')">뜻 가리기</button>
         </div>
-        
-        <div class="sheet-section-title">일괄 상태 변경 (전체 단어)</div>
+        <div class="sheet-section-title">일괄 상태 변경</div>
         <div class="chip-container" style="margin-bottom:10px;">
             <button class="chip" onclick="setAllStatus(2)">전체 암기</button>
             <button class="chip" onclick="setAllStatus(1)">전체 미암기</button>
@@ -580,26 +541,17 @@ button::-moz-focus-inner {
             const overlay = document.getElementById('loadingOverlay');
             overlay.style.opacity = '0';
             setTimeout(() => { overlay.style.display = 'none'; }, 500);
-            
-            // [추가] TTS 초기화 (미리 목소리 로드)
-            if(window.speechSynthesis) {
-                window.speechSynthesis.getVoices();
-            }
+            if(window.speechSynthesis) window.speechSynthesis.getVoices();
         });
 
-        // [추가] 토스트 메시지 표시 함수
         function showToast(msg) {
             const t = document.getElementById('toast');
             t.innerText = msg;
             t.classList.add('show');
-            // 기존 타이머 제거 로직은 간단히 처리
             if(t.timer) clearTimeout(t.timer);
-            t.timer = setTimeout(() => {
-                t.classList.remove('show');
-            }, 2000);
+            t.timer = setTimeout(() => { t.classList.remove('show'); }, 2000);
         }
 
-        // --- 모달/페이지 전환 애니메이션 ---
         function openModalWithAnim(id) {
             const el = document.getElementById(id);
             el.style.display = 'flex';
@@ -621,7 +573,6 @@ button::-moz-focus-inner {
             }, 300);
         }
 
-        // --- Bottom Sheet ---
         function openViewSettings() {
             document.getElementById('menuOverlay').classList.add('active');
             document.getElementById('viewSettingsSheet').classList.add('active');
@@ -677,14 +628,12 @@ button::-moz-focus-inner {
             maskingMode = mode; updateSheetUI(); renderWords();
         }
 
-        // [추가] 일괄 상태 변경 기능
         function setAllStatus(status) {
             if(currentVocabIdx === -1) return;
             const v = savedVocabs[currentVocabIdx];
             v.corpusList.forEach(w => w.status = status);
             saveAndRefresh(false);
             renderWords();
-            
             const statusText = status === 2 ? "암기 완료" : (status === 1 ? "미암기" : "초기화");
             showToast(`모든 단어가 ${statusText} 상태로 변경되었습니다.`);
             closeAllBottomSheets();
@@ -805,12 +754,9 @@ button::-moz-focus-inner {
             }
         }
 
-        // [수정] TTS 지연 개선
         function speak(text) {
             if(!window.speechSynthesis) return;
-            // 대기 중인 발화 취소 (즉시 실행을 위해)
             window.speechSynthesis.cancel();
-            
             const u = new SpeechSynthesisUtterance(text);
             u.lang = 'en-US';
             u.rate = 1.0; 
@@ -821,7 +767,6 @@ button::-moz-focus-inner {
             if(!divEl.classList.contains('status-check')) return;
             const v = savedVocabs[currentVocabIdx];
             let currentStatus = v.corpusList[wIdx].status || 0;
-            // 0 -> 2(완료) -> 1(미완료) -> 0 순서
             let nextStatus = currentStatus === 0 ? 2 : (currentStatus === 2 ? 1 : 0);
 
             v.corpusList[wIdx].status = nextStatus;
@@ -830,7 +775,6 @@ button::-moz-focus-inner {
             if(!activeFilters.has('all')) renderWords();
             else divEl.className = `status-check checked-${nextStatus}`;
 
-            // [추가] 상태 변경 알림 메시지 표시
             let msg = "";
             if (nextStatus === 2) msg = "암기됨으로 체크되었습니다";
             else if (nextStatus === 1) msg = "미암기로 체크되었습니다";
@@ -962,56 +906,63 @@ button::-moz-focus-inner {
             reader.readAsText(file);
         }
 
-        // [수정] 공유 로직 개선 (PC 공유 지원 및 클립보드 복사 폴백)
+        // [수정] 공유 로직 개선
         async function handleExportAction(type) {
             closeAllBottomSheets();
             const data = savedVocabs[contextVocabIdx];
             const content = JSON.stringify(data, null, 2);
-            const fileName = `${data.vocabulary.name}.doc`;
+            // .doc 대신 .txt 사용 권장 (모바일 공유 호환성)
+            const fileName = `${data.vocabulary.name}.txt`;
 
             if (type === 'save') {
-                const blob = new Blob([content], {type: 'application/msword'});
+                // 저장 시에는 확장자 자유로움 (.doc 유지해도 무방하나 통일성 위해)
+                const blob = new Blob([content], {type: 'text/plain'});
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url; a.download = fileName; a.click();
+                a.href = url; a.download = `${data.vocabulary.name}.doc`; // 저장은 .doc으로 유지
+                a.click();
             } else if (type === 'share') {
-                const blob = new Blob([content], {type: 'text/plain'});
-                const file = new File([blob], fileName, { type: 'text/plain' });
+                if (!window.isSecureContext) {
+                    alert('공유 기능은 보안 연결(HTTPS) 또는 localhost에서만 작동합니다.\n현재 환경에서는 "파일로 저장"을 이용해주세요.');
+                    return;
+                }
+                
+                try {
+                    const blob = new Blob([content], {type: 'text/plain'});
+                    // 공유 시에는 호환성 위해 .txt 확장자 사용
+                    const file = new File([blob], fileName, { type: 'text/plain' });
 
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    // 모바일 등 네이티브 공유 가능 시
-                    try {
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         await navigator.share({
                             files: [file],
                             title: data.vocabulary.name,
                             text: '단어장 파일입니다.'
                         });
-                    } catch (error) { console.log('Sharing failed', error); }
-                } else {
-                    // PC 등 공유 불가 시 텍스트 복사로 대체
-                    try {
+                    } else {
+                        // 파일 공유 미지원 시 텍스트 복사 폴백
                         await navigator.clipboard.writeText(content);
-                        alert('PC에서는 파일 공유가 제한될 수 있습니다.\n단어장 데이터가 클립보드에 복사되었습니다.\n메모장 등에 붙여넣기 하세요.');
-                    } catch (err) {
-                        alert('이 환경에서는 공유 기능을 사용할 수 없습니다. "파일로 저장"을 이용해주세요.');
+                        alert('이 기기/브라우저는 파일 공유를 지원하지 않습니다.\n데이터가 클립보드에 복사되었습니다.');
+                    }
+                } catch (error) {
+                    console.error('Sharing failed', error);
+                    // 사용자가 취소했을 수 있으므로 에러 메시지는 신중하게
+                    if (error.name !== 'AbortError') {
+                        alert('공유에 실패했습니다. "파일로 저장"을 이용해주세요.');
                     }
                 }
             }
         }
 
-        // [수정] 탭 전환 및 애니메이션 처리 개선
         function switchTab(tab, el) {
             const currentTab = document.querySelector('.page.active');
             const targetTabId = 'tab-' + tab;
             
-            // 애니메이션 트리거
             document.querySelectorAll('.nav-item').forEach(n => {
                 n.classList.remove('active');
-                n.classList.remove('animate'); // 기존 애니메이션 리셋
+                n.classList.remove('animate');
             });
             el.classList.add('active');
             
-            // 약간의 딜레이 후 애니메이션 클래스 추가 (리플로우 유도)
             void el.offsetWidth; 
             el.classList.add('animate');
 
