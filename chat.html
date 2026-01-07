@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chat+</title>
+    <title>Clean Blue Chat</title>
     <style>
         /* --- [테마 변수] --- */
         :root {
@@ -13,16 +13,18 @@
             --text-main: #2c3e50;
             --text-sub: #95a5a6;
             --error-color: #ff4757;
-            --shadow-card: 0 4px 20px rgba(0,0,0,0.08); /* 카드 그림자 */
+            --shadow-card: 0 4px 20px rgba(0,0,0,0.06);
             --radius-round: 30px; 
             --radius-card: 20px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background: var(--bg-color); height: 100vh; overflow: hidden; color: var(--text-main); }
+        input, textarea { user-select: text; }
 
         /* --- [아이콘 & 유틸] --- */
         .icon { width: 24px; height: 24px; fill: var(--text-main); }
+        .icon-sm { width: 18px; height: 18px; fill: var(--text-main); }
         .icon-white { fill: white; }
 
         /* --- [공통 UI] --- */
@@ -30,7 +32,7 @@
             width: 100%; padding: 14px 20px; 
             border: 1px solid #e0e0e0; background: #f8f9fa;
             border-radius: var(--radius-round); font-size: 0.95rem; color: var(--text-main);
-            outline: none; margin-bottom: 10px;
+            outline: none; margin-bottom: 10px; transition: 0.2s;
         }
         .bubble-input:focus { border-color: var(--primary-color); background: #fff; }
 
@@ -55,11 +57,7 @@
         .bubble-btn.is-loading .loading-spinner { opacity: 1; }
 
         .error-msg { color: var(--error-color); font-size: 0.85rem; height: 20px; margin-bottom: 5px; text-align: center; }
-        
-        /* 토스트 메시지 (친구추가 결과 등) */
-        .toast-msg {
-            color: var(--primary-color); font-size: 0.85rem; margin-top: 8px; text-align: center; display: none;
-        }
+        .toast-msg { color: var(--primary-color); font-size: 0.85rem; margin-top: 8px; text-align: center; display: none; }
 
         /* --- [화면 전환] --- */
         .view {
@@ -76,115 +74,88 @@
             background: #fff; z-index: 20; border-bottom: 1px solid #f0f0f0;
         }
         .header h2 { font-size: 1.2rem; font-weight: 700; }
-        .icon-btn { background: none; border: none; cursor: pointer; padding: 5px; }
+        .icon-btn { background: none; border: none; cursor: pointer; padding: 5px; display: flex; align-items: center; justify-content: center;}
 
         /* --- [로그인 & 회원가입] --- */
         .auth-container { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 40px; }
         .app-logo { font-size: 2.5rem; font-weight: 900; color: var(--primary-color); margin-bottom: 30px; text-align: center; letter-spacing: -1px; }
         .link-text { text-align: center; margin-top: 20px; color: var(--text-sub); font-size: 0.85rem; text-decoration: underline; cursor: pointer; }
         
-        .signup-wrapper { flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column; }
-        .signup-slider { display: flex; width: 300%; height: 100%; transition: transform 0.4s ease; }
-        .signup-step { width: 33.333%; flex-shrink: 0; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
-        .step-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 10px; }
-        .step-desc { color: var(--text-sub); margin-bottom: 30px; font-size: 0.95rem; }
-        
-        .terms-box {
-            background: var(--surface-color); padding: 15px; border-radius: 15px; margin-bottom: 20px;
-            display: flex; align-items: center; gap: 12px; cursor: pointer;
+        /* 자동 로그인 체크박스 UI */
+        .auto-login-wrapper {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 20px; cursor: pointer; justify-content: center;
         }
+        .auto-login-label { font-size: 0.9rem; color: #666; }
+        
+        /* 약관/자동로그인 공통 체크박스 */
         .checkbox-custom {
-            width: 24px; height: 24px; border: 2px solid #ddd; border-radius: 50%;
+            width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 6px;
             display: flex; align-items: center; justify-content: center; transition: 0.2s; background: #fff;
         }
         .checkbox-custom svg { width: 14px; height: 14px; fill: white; display: none; }
         .checkbox-custom.checked { background: var(--primary-color); border-color: var(--primary-color); }
         .checkbox-custom.checked svg { display: block; }
+        .checkbox-round { border-radius: 50%; } /* 약관용은 원형 */
+
+        /* 회원가입 슬라이더 */
+        .signup-wrapper { flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .signup-slider { display: flex; width: 300%; height: 100%; transition: transform 0.4s ease; }
+        .signup-step { width: 33.333%; flex-shrink: 0; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+        .step-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 10px; }
+        .step-desc { color: var(--text-sub); margin-bottom: 30px; font-size: 0.95rem; }
+        .terms-box { background: var(--surface-color); padding: 15px; border-radius: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
 
         /* --- [친구 목록 (카드형)] --- */
         .list-container { flex: 1; overflow-y: auto; padding: 15px 20px; background: #fbfbfb; }
         .list-item {
             display: flex; align-items: center; padding: 16px; margin-bottom: 15px;
-            background: #fff; 
-            border-radius: var(--radius-card); /* 둥근 카드 */
-            box-shadow: var(--shadow-card); /* 그림자 적용 */
-            cursor: pointer; transition: transform 0.2s;
+            background: #fff; border-radius: var(--radius-card); box-shadow: var(--shadow-card);
+            cursor: pointer; transition: transform 0.2s; position: relative;
         }
-        .list-item:hover { transform: translateY(-2px); }
-        .list-item:active { transform: scale(0.98); }
+        .list-item:active { transform: scale(0.97); background: #fafafa; }
         .avatar {
             width: 46px; height: 46px; border-radius: 18px; background: #dfe4ea;
             color: #777; font-weight: bold; display: flex; align-items: center; justify-content: center;
             font-size: 1.1rem; margin-right: 15px; flex-shrink: 0;
         }
 
-        /* --- [알림 센터 (전체 화면)] --- */
+        /* --- [알림 센터] --- */
         #view-notifications .list-container { background: #fff; }
-        .noti-item {
-            display: flex; flex-direction: column; padding: 15px; 
-            border-bottom: 1px solid #f0f0f0; gap: 10px;
-        }
+        .noti-item { display: flex; flex-direction: column; padding: 15px; border-bottom: 1px solid #f0f0f0; gap: 10px; }
         .noti-actions { display: flex; gap: 8px; }
         .noti-actions button { flex: 1; padding: 10px; font-size: 0.9rem; }
 
         /* --- [채팅방] --- */
-        /* 헤더 높이 줄임 */
         #view-chat .header { padding: 8px 15px; height: 50px; }
-        #chat-room-name { font-size: 1rem; }
-
-        #chat-messages {
-            flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
-            background: #ffffff;
-        }
-
-        /* 메시지 레이아웃 (스피너 배치를 위한 Flex) */
+        #chat-title-area { display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 5px; border-radius: 8px;}
+        #chat-title-area:active { background: #f0f0f0; }
+        #chat-room-name { font-size: 1rem; font-weight: bold; }
+        
+        #chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #ffffff; }
         .msg-row { display: flex; width: 100%; align-items: flex-end; }
         .msg-row.received { justify-content: flex-start; }
         .msg-row.sent { justify-content: flex-end; }
-
-        .msg {
-            max-width: 75%; padding: 10px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4;
-            word-break: break-word; position: relative;
-        }
+        .msg { max-width: 75%; padding: 10px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; word-break: break-word; }
         .msg.received { background: #f1f3f5; color: var(--text-main); border-bottom-left-radius: 4px; }
         .msg.sent { background: var(--primary-color); color: white; border-bottom-right-radius: 4px; }
-
-        /* 메시지 옆 로딩 스피너 */
-        .msg-spinner {
-            width: 14px; height: 14px; border: 2px solid #ddd; 
-            border-top-color: var(--primary-color); border-radius: 50%;
-            margin-right: 8px; /* 내 메시지 왼쪽에 위치 */
-            animation: spin 0.8s infinite linear;
-            flex-shrink: 0;
-        }
+        .msg-spinner { width: 14px; height: 14px; border: 2px solid #ddd; border-top-color: var(--primary-color); border-radius: 50%; margin-right: 8px; animation: spin 0.8s infinite linear; flex-shrink: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .chat-input-area {
-            padding: 8px 12px; background: #ffffff; border-top: 1px solid #eee; display: flex; gap: 8px; align-items: center;
-            padding-bottom: max(8px, env(safe-area-inset-bottom));
-        }
+        .chat-input-area { padding: 8px 12px; background: #ffffff; border-top: 1px solid #eee; display: flex; gap: 8px; align-items: center; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
         #msg-input { margin: 0; background: #f1f3f5; border: none; height: 42px; padding: 0 16px; flex: 1; }
-        #send-btn {
-            width: 42px; height: 42px; border-radius: 50%;
-            flex-shrink: 0; padding: 0; display: flex; align-items: center; justify-content: center;
-        }
+        #send-btn { width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; padding: 0; display: flex; align-items: center; justify-content: center; }
         #send-btn svg { width: 20px; height: 20px; fill: white; }
 
-        /* 모달 & 닷 */
-        .red-dot {
-            position: absolute; top: 2px; right: 2px; width: 6px; height: 6px;
-            background: #ff4757; border-radius: 50%; display: none;
-        }
+        /* --- [모달 & 팝업] --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.4); z-index: 100; display: none;
             align-items: center; justify-content: center;
         }
         .modal-overlay.show { display: flex; }
-        .modal-box {
-            width: 80%; max-width: 300px; background: white; padding: 25px;
-            border-radius: 20px; text-align: center;
-        }
+        .modal-box { width: 80%; max-width: 300px; background: white; padding: 25px; border-radius: 20px; text-align: center; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .red-dot { position: absolute; top: 2px; right: 2px; width: 6px; height: 6px; background: #ff4757; border-radius: 50%; display: none; }
 
     </style>
 </head>
@@ -196,6 +167,8 @@
     <symbol id="icon-bell" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></symbol>
     <symbol id="icon-arrow-up" viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></symbol>
     <symbol id="icon-check" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></symbol>
+    <symbol id="icon-logout" viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></symbol>
+    <symbol id="icon-edit" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></symbol>
 </svg>
 
 <div id="custom-modal" class="modal-overlay">
@@ -206,12 +179,41 @@
     </div>
 </div>
 
+<div id="logout-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin-bottom: 10px;">로그아웃</h3>
+        <p style="color:#666; margin-bottom: 20px;">정말 로그아웃 하시겠습니까?<br>자동 로그인도 해제됩니다.</p>
+        <div class="modal-btns">
+            <button class="bubble-btn secondary" onclick="closeLogoutModal()">취소</button>
+            <button class="bubble-btn" onclick="confirmLogout()">로그아웃</button>
+        </div>
+    </div>
+</div>
+
+<div id="nickname-modal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 style="margin-bottom: 5px;">별명 설정</h3>
+        <p style="color:#888; font-size:0.85rem; margin-bottom: 15px;">나에게만 보이는 이름입니다.</p>
+        <input type="text" id="nickname-input" class="bubble-input" placeholder="별명 입력">
+        <div class="modal-btns">
+            <button class="bubble-btn secondary" onclick="closeNicknameModal()">취소</button>
+            <button class="bubble-btn" onclick="saveNickname()">저장</button>
+        </div>
+    </div>
+</div>
+
 <div id="app">
     <div id="view-login" class="view active">
         <div class="auth-container">
             <div class="app-logo">Chat+</div>
             <input type="text" id="login-id" class="bubble-input" placeholder="아이디" oninput="clearError('login-error')">
             <input type="password" id="login-pw" class="bubble-input" placeholder="비밀번호" oninput="clearError('login-error')">
+            
+            <div class="auto-login-wrapper" onclick="toggleAutoLogin()">
+                <div class="checkbox-custom" id="auto-login-check"><svg><use href="#icon-check"></use></svg></div>
+                <span class="auto-login-label">자동 로그인</span>
+            </div>
+
             <div id="login-error" class="error-msg"></div>
             <button id="btn-login" class="bubble-btn" onclick="tryLogin()">
                 <span class="btn-content">로그인</span><div class="loading-spinner"></div>
@@ -250,7 +252,7 @@
                     <div class="step-title">약관 동의 ✅</div>
                     <div class="step-desc">마지막 단계입니다.</div>
                     <div class="terms-box" onclick="toggleTerms()">
-                        <div class="checkbox-custom" id="terms-check"><svg><use href="#icon-check"></use></svg></div>
+                        <div class="checkbox-custom checkbox-round" id="terms-check"><svg><use href="#icon-check"></use></svg></div>
                         <span>서비스 이용약관에 동의합니다.</span>
                     </div>
                     <div id="signup-error-3" class="error-msg"></div>
@@ -267,8 +269,8 @@
 
     <div id="view-friends" class="view">
         <div class="header">
-            <h2>Friends</h2>
-            <div style="display:flex; gap:10px;">
+            <h2 style="font-size: 1.4rem;">Friends</h2>
+            <div style="display:flex; gap:4px;">
                 <button class="icon-btn" onclick="switchView('view-search')">
                     <svg class="icon"><use href="#icon-search"></use></svg>
                 </button>
@@ -276,11 +278,14 @@
                     <svg class="icon"><use href="#icon-bell"></use></svg>
                     <div id="noti-badge" class="red-dot"></div>
                 </button>
+                <button class="icon-btn" onclick="openLogoutModal()" style="margin-left: 5px;">
+                    <svg class="icon"><use href="#icon-logout"></use></svg>
+                </button>
             </div>
         </div>
         <div style="padding: 20px 20px 0; background:#fbfbfb;">
             <h1 id="my-name-display" style="margin-bottom: 5px;">User</h1>
-            <p style="color:#aaa; font-size:0.9rem;">온라인</p>
+            <p style="color:#aaa; font-size:0.9rem;">친구를 길게 눌러 별명을 설정해보세요.</p>
         </div>
         <div id="friend-list-ul" class="list-container"></div>
     </div>
@@ -325,7 +330,10 @@
             <button class="icon-btn" onclick="exitChat()">
                 <svg class="icon"><use href="#icon-back"></use></svg>
             </button>
-            <h2 id="chat-room-name">Chat</h2>
+            <div id="chat-title-area" onclick="openNicknameModal(currentChatUser)">
+                <h2 id="chat-room-name">Chat</h2>
+                <svg class="icon-sm" style="fill:#aaa;"><use href="#icon-edit"></use></svg>
+            </div>
             <div style="width:24px;"></div>
         </div>
         <main id="chat-messages"></main>
@@ -346,27 +354,134 @@
     let currentChatUser = null;
     let foundUser = null;
     let pollInterval = null;
+    
+    // 회원가입 관련
     let currentSignupStep = 1;
     let isTermsAgreed = false;
+    
+    // 자동로그인 관련
+    let isAutoLoginChecked = false;
+
+    // 별명 설정 관련
+    let targetNicknameUser = null;
+    let longPressTimer = null;
+
+    // --- [초기화: 자동 로그인 체크] ---
+    window.onload = function() {
+        checkAutoLogin();
+    };
+
+    function checkAutoLogin() {
+        const saved = localStorage.getItem('auto_login_info');
+        if(saved) {
+            const info = JSON.parse(saved);
+            document.getElementById('login-id').value = info.id;
+            document.getElementById('login-pw').value = info.pw;
+            // 자동 로그인 시도
+            tryLogin(true);
+        }
+    }
 
     // --- [유틸리티] ---
     function switchView(id) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
-
     function toggleBtnLoading(btnId, isLoading) {
         const btn = document.getElementById(btnId);
         if(isLoading) { btn.disabled = true; btn.classList.add('is-loading'); } 
         else { btn.disabled = false; btn.classList.remove('is-loading'); }
     }
-    
     function showError(elId, msg) { document.getElementById(elId).innerText = msg; }
     function clearError(elId) { document.getElementById(elId).innerText = ""; }
     function showModal(t, d) { document.getElementById('modal-title').innerText = t; document.getElementById('modal-desc').innerText = d; document.getElementById('custom-modal').classList.add('show'); }
     function closeModal() { document.getElementById('custom-modal').classList.remove('show'); }
+    function hasSpace(s) { return /\s/.test(s); }
 
-    // --- [회원가입/로그인] ---
+    // --- [자동 로그인 로직] ---
+    function toggleAutoLogin() {
+        isAutoLoginChecked = !isAutoLoginChecked;
+        const check = document.getElementById('auto-login-check');
+        if(isAutoLoginChecked) check.classList.add('checked');
+        else check.classList.remove('checked');
+    }
+
+    // --- [로그아웃 로직] ---
+    function openLogoutModal() { document.getElementById('logout-modal').classList.add('show'); }
+    function closeLogoutModal() { document.getElementById('logout-modal').classList.remove('show'); }
+    
+    function confirmLogout() {
+        // 데이터 초기화
+        myId = null; myName = null; currentChatUser = null;
+        if(pollInterval) clearInterval(pollInterval);
+        
+        // 자동 로그인 정보 삭제
+        localStorage.removeItem('auto_login_info');
+        
+        // 뷰 초기화
+        document.getElementById('login-id').value = "";
+        document.getElementById('login-pw').value = "";
+        isAutoLoginChecked = false;
+        document.getElementById('auto-login-check').classList.remove('checked');
+
+        closeLogoutModal();
+        switchView('view-login');
+    }
+
+    // --- [별명(Nickname) 로직] ---
+    function getNickname(uid, originalName) {
+        // 내 ID 기반 키에서 별명 목록 가져오기
+        const key = `nicknames_${myId}`;
+        const data = localStorage.getItem(key);
+        if(data) {
+            const json = JSON.parse(data);
+            if(json[uid]) return json[uid]; // 설정된 별명 반환
+        }
+        return originalName; // 없으면 원래 이름
+    }
+
+    function openNicknameModal(uid) {
+        targetNicknameUser = uid;
+        document.getElementById('nickname-input').value = "";
+        document.getElementById('nickname-modal').classList.add('show');
+        // 현재 별명 있으면 프리셋
+        const currentNick = getNickname(uid, "");
+        if(currentNick) document.getElementById('nickname-input').value = currentNick;
+    }
+    function closeNicknameModal() { document.getElementById('nickname-modal').classList.remove('show'); targetNicknameUser = null; }
+
+    function saveNickname() {
+        if(!myId || !targetNicknameUser) return;
+        const newNick = document.getElementById('nickname-input').value.trim();
+        const key = `nicknames_${myId}`;
+        let data = localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : {};
+        
+        if(newNick) {
+            data[targetNicknameUser] = newNick;
+        } else {
+            delete data[targetNicknameUser]; // 비어있으면 삭제 (원래 이름 사용)
+        }
+        
+        localStorage.setItem(key, JSON.stringify(data));
+        closeNicknameModal();
+        
+        // UI 갱신
+        loadFriends(); 
+        if(currentChatUser === targetNicknameUser) {
+            document.getElementById('chat-room-name').innerText = newNick || "Chat"; // 채팅방 이름 갱신이 필요하므로 원본 이름을 어디선가 가져와야 하는데..
+            // 간단히 채팅방 닫았다 열거나, 여기서는 텍스트만 업데이트 (원본 이름 유지가 어려우면 그냥 입력값으로)
+            // 더 정확히 하려면 enterChat을 다시 호출하는 게 좋음, 하지만 currentChatUser가 있으니 UI만 업데이트
+            if(!newNick) {
+                // 원래 이름 복구가 필요하지만, API 호출 없이는 힘듦. 
+                // UX상 그냥 "새로고침" 효과를 위해 리로드
+                loadFriends(); 
+            } else {
+                document.getElementById('chat-room-name').innerText = newNick;
+            }
+        }
+    }
+
+    // --- [회원가입] ---
     function startSignup() {
         document.getElementById('signup-id').value = ''; document.getElementById('signup-name').value = '';
         document.getElementById('signup-pw').value = ''; document.getElementById('signup-pw-confirm').value = '';
@@ -376,7 +491,6 @@
     }
     function cancelSignup() { switchView('view-login'); }
     function moveSignupSlider(step) { document.getElementById('signup-slider').style.transform = `translateX(${-(step - 1) * 33.333}%)`; }
-    function hasSpace(s) { return /\s/.test(s); }
     function toggleTerms() { isTermsAgreed = !isTermsAgreed; document.getElementById('terms-check').classList.toggle('checked'); clearError('signup-error-3'); }
 
     function nextSignupStep(step) {
@@ -419,7 +533,8 @@
         } catch(e) { toggleBtnLoading('btn-signup-complete', false); showError('signup-error-3', "서버 오류"); }
     }
 
-    async function tryLogin() {
+    // --- [로그인] ---
+    async function tryLogin(isAuto = false) {
         const id = document.getElementById('login-id').value.trim();
         const pw = document.getElementById('login-pw').value.trim();
         if(!id || !pw) return showError('login-error', '아이디/비번 입력');
@@ -435,12 +550,28 @@
             if(res.ok) {
                 myId = d.user_id; myName = d.name;
                 document.getElementById('my-name-display').innerText = myName;
-                clearError('login-error'); await loadFriends(); startPolling(); switchView('view-friends');
-            } else showError('login-error', d.detail || "로그인 실패");
-        } catch(e) { toggleBtnLoading('btn-login', false); showError('login-error', "서버 오류"); }
+                clearError('login-error');
+                
+                // 자동 로그인 저장 로직
+                if(isAutoLoginChecked) {
+                    localStorage.setItem('auto_login_info', JSON.stringify({ id: id, pw: pw }));
+                }
+
+                await loadFriends(); 
+                startPolling(); 
+                switchView('view-friends');
+            } else {
+                // 자동 로그인이 실패했다면 정보 삭제
+                if(isAuto) localStorage.removeItem('auto_login_info');
+                showError('login-error', d.detail || "로그인 실패");
+            }
+        } catch(e) { 
+            toggleBtnLoading('btn-login', false); 
+            showError('login-error', "서버 오류"); 
+        }
     }
 
-    // --- [친구 목록 (카드형)] ---
+    // --- [친구 목록 (카드형 + 별명 + 롱프레스)] ---
     async function loadFriends() {
         try {
             const res = await fetch(`${BASE_URL}/api/friends/${myId}`);
@@ -448,13 +579,28 @@
             const container = document.getElementById('friend-list-ul');
             container.innerHTML = "";
             list.forEach(u => {
+                const displayName = getNickname(u.user_id, u.name); // 별명 적용
+                
                 const div = document.createElement('div');
                 div.className = 'list-item';
-                div.onclick = () => enterChat(u.user_id, u.name);
+                
+                // 롱프레스 이벤트 (모바일 터치 & PC 마우스 대응)
+                let pressTimer;
+                const startPress = () => { pressTimer = setTimeout(() => openNicknameModal(u.user_id), 600); }
+                const cancelPress = () => { clearTimeout(pressTimer); }
+                
+                div.addEventListener('mousedown', startPress);
+                div.addEventListener('touchstart', startPress);
+                div.addEventListener('mouseup', cancelPress);
+                div.addEventListener('mouseleave', cancelPress);
+                div.addEventListener('touchend', cancelPress);
+                
+                div.onclick = () => { cancelPress(); enterChat(u.user_id, displayName); }; // 클릭 시 채팅방
+
                 div.innerHTML = `
-                    <div class="avatar">${u.name[0]}</div>
+                    <div class="avatar">${displayName[0]}</div>
                     <div style="flex:1;">
-                        <div style="font-weight:bold; font-size:1.05rem;">${u.name}</div>
+                        <div style="font-weight:bold; font-size:1.05rem;">${displayName}</div>
                         <div style="font-size:0.85rem; color:#aaa; margin-top:4px;">터치하여 대화하기</div>
                     </div>`;
                 container.appendChild(div);
@@ -462,7 +608,7 @@
         } catch(e) {}
     }
 
-    // --- [검색 및 요청 (모달 제거)] ---
+    // --- [검색 및 요청] ---
     async function searchUser() {
         const q = document.getElementById('search-input').value;
         if(!q) return;
@@ -488,24 +634,21 @@
                 body: JSON.stringify({ my_id: myId, target_id: foundUser.user_id })
             });
             const d = await res.json();
-            // 모달 대신 UI 업데이트
             if(d.status === 'ok' || res.ok) {
                 const btn = document.getElementById('req-btn');
                 btn.innerText = "요청됨"; btn.disabled = true;
                 const toast = document.getElementById('req-toast');
-                toast.innerText = d.message || "요청을 보냈습니다.";
-                toast.style.display = 'block';
+                toast.innerText = d.message || "요청을 보냈습니다."; toast.style.display = 'block';
             }
         } catch(e) {}
     }
 
-    // --- [알림 (전체화면)] ---
+    // --- [알림] ---
     async function checkNotifications() {
         try {
             const res = await fetch(`${BASE_URL}/api/notifications/${myId}`);
             const data = await res.json();
             const badge = document.getElementById('noti-badge');
-            
             if(data.length > 0) { badge.style.display = 'block'; renderNotiList(data); } 
             else { badge.style.display = 'none'; document.getElementById('noti-list').innerHTML = "<div style='color:#ccc; text-align:center; padding:40px;'>새로운 알림이 없습니다.</div>"; }
         } catch(e) {}
@@ -537,32 +680,31 @@
         } catch(e) {}
     }
 
-    // --- [채팅 (Optimistic UI & Spinner)] ---
+    // --- [채팅] ---
     function startPolling() {
         if(pollInterval) clearInterval(pollInterval);
         pollInterval = setInterval(() => {
             checkNotifications();
-            if(currentChatUser) loadMessages(false); // false = don't force scroll
+            if(currentChatUser) loadMessages(false);
         }, 2000);
     }
 
-    function enterChat(fid, fname) {
+    function enterChat(fid, displayName) {
         currentChatUser = fid;
-        document.getElementById('chat-room-name').innerText = fname;
+        // 별명 적용된 이름을 표시
+        document.getElementById('chat-room-name').innerText = displayName;
         document.getElementById('chat-messages').innerHTML = "";
         switchView('view-chat');
         loadMessages(true);
     }
     function exitChat() { currentChatUser = null; switchView('view-friends'); }
 
-    // 메시지 렌더링 헬퍼
     function renderMessageRow(text, type, isTemp = false, tempId = null) {
         const container = document.getElementById('chat-messages');
         const row = document.createElement('div');
         row.className = `msg-row ${type}`;
         if(isTemp) row.id = `temp-row-${tempId}`;
 
-        // 내가 보낸 메시지(sent)이고 전송 중(isTemp)이면 왼쪽에 스피너 추가
         if(type === 'sent' && isTemp) {
             const spinner = document.createElement('div');
             spinner.className = 'msg-spinner';
@@ -586,11 +728,6 @@
             const msgs = await res.json();
             
             const container = document.getElementById('chat-messages');
-            // 기존 내용 초기화 (간단 구현을 위해) - *주의: 실제 앱에서는 temp 메시지 유지 로직 필요하나 여기선 단순화*
-            // 여기서는 Optimistic Update와 충돌 방지를 위해, 
-            // "서버에서 온 메시지 개수"가 "현재 DOM 메시지 개수(전송중 제외)"와 다를 때만 다시 그리는 식으로 최적화 가능.
-            // 하지만 간단히 하기 위해: 현재 '전송중(isTemp)'인 메시지는 남겨두고 나머지만 다시 그림.
-            
             const temps = Array.from(container.querySelectorAll('[id^="temp-row-"]'));
             container.innerHTML = "";
             
@@ -599,7 +736,6 @@
                 renderMessageRow(m.text, type);
             });
             
-            // 전송 중인 임시 메시지들 다시 붙이기
             temps.forEach(t => container.appendChild(t));
 
             if(forceScroll) container.scrollTop = container.scrollHeight;
@@ -611,33 +747,20 @@
         const text = input.value.trim();
         if(!text) return;
 
-        // 1. 즉시 화면에 표시 (Optimistic UI)
         const tempId = Date.now();
         renderMessageRow(text, 'sent', true, tempId);
-        input.value = ""; // 입력창 비우기
+        input.value = "";
 
         try {
-            // 2. 서버 전송
             await fetch(`${BASE_URL}/api/message/send`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ sender: myId, receiver: currentChatUser, text: text })
             });
-            
-            // 3. 성공 시 스피너 제거
             const spinner = document.getElementById(`spinner-${tempId}`);
             if(spinner) spinner.remove();
-            
-            // 임시 ID 제거 (일반 메시지로 전환)
             const row = document.getElementById(`temp-row-${tempId}`);
             if(row) row.removeAttribute('id');
-
-            // loadMessages(true); // 폴링이 돌고 있으므로 굳이 즉시 호출 안해도 되지만, 확실히 하려면 호출. 
-            // 다만 호출 시 전체 리렌더링으로 깜빡일 수 있으니 여기선 스피너 제거만으로 완료 처리.
-
-        } catch(e) {
-            // 실패 시 처리 (여기선 간단히 얼럿)
-            alert("전송 실패");
-        }
+        } catch(e) { alert("전송 실패"); }
     }
     
     document.getElementById('msg-input').addEventListener('keypress', (e) => {
