@@ -378,6 +378,49 @@
         .app-version { font-size: 14px; color: var(--text-gray); font-family: monospace; }
         .app-author { font-size: 13px; color: #b0b0b5; margin-top: 6px; }
 
+
+
+        /* ===============================
+   [추가] 특정 버튼 모바일 강제 스타일 보정
+   =============================== */
+
+/* 취소 / 저장 / 삭제 계열 버튼 */
+.btn-full,
+.btn-sub,
+button.btn-full,
+button.btn-sub {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border-radius: 16px !important;
+}
+
+/* 제거(가운데 일직선 아이콘) 버튼 */
+.btn-remove,
+button.btn-remove,
+input.btn-remove,
+input[type="button"].btn-remove {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border-radius: 50% !important;
+    background-clip: padding-box !important;
+}
+
+/* 모바일 포커스/탭 하이라이트 제거 */
+button:focus,
+input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+button::-moz-focus-inner {
+    border: 0;
+}
+
+        
     </style>
 </head>
 <body>
