@@ -3,221 +3,342 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>App-like Chat</title>
+    <title>Chat+</title>
     <style>
-        /* --- [기본 변수 & 리셋] --- */
+        /* --- [테마 변수] --- */
         :root {
-            --primary: #0b62d8; --bg: #ffffff; --input-bg: #f5f7fa; 
-            --text: #222; --gray: #999; --danger: #ff4b4b;
-            --radius-L: 24px; --radius-M: 16px;
+            --bg-color: #ffffff;
+            --surface-color: #f7f9fc;
+            --primary-color: #3e81fe;
+            --text-main: #2c3e50;
+            --text-sub: #95a5a6;
+            --error-color: #ff4757;
+            --shadow-card: 0 4px 20px rgba(0,0,0,0.08); /* 카드 그림자 */
+            --radius-round: 30px; 
+            --radius-card: 20px;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); height: 100vh; overflow: hidden; color: var(--text); position: relative; }
 
-        /* --- [화면 전환 애니메이션] --- */
-        .view {
-            display: none; width: 100%; height: 100%; flex-direction: column;
-            position: absolute; top: 0; left: 0; background: white; z-index: 1;
-            opacity: 0; transform: scale(0.98); transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-        .view.active { display: flex; z-index: 10; opacity: 1; transform: scale(1); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-color); height: 100vh; overflow: hidden; color: var(--text-main); }
 
-        /* --- [UI 컴포넌트] --- */
-        .pill-input {
-            width: 100%; padding: 14px 20px; border: none; border-radius: var(--radius-L);
-            background: var(--input-bg); font-size: 1rem; margin-bottom: 12px; outline: none;
-        }
-        .pill-btn {
-            width: 100%; padding: 14px; background: var(--primary); color: white;
-            border: none; border-radius: var(--radius-L); font-weight: 700; font-size: 1rem;
-            cursor: pointer; display: flex; justify-content: center; align-items: center;
-            transition: 0.2s;
-        }
-        .pill-btn:active { transform: scale(0.97); }
-        .pill-btn.secondary { background: #e0e0e0; color: #333; }
+        /* --- [아이콘 & 유틸] --- */
+        .icon { width: 24px; height: 24px; fill: var(--text-main); }
+        .icon-white { fill: white; }
 
-        /* --- [로딩 스피너] --- */
-        .spinner {
-            width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: white; border-radius: 50%;
-            animation: spin 0.8s linear infinite; display: none;
+        /* --- [공통 UI] --- */
+        .bubble-input {
+            width: 100%; padding: 14px 20px; 
+            border: 1px solid #e0e0e0; background: #f8f9fa;
+            border-radius: var(--radius-round); font-size: 0.95rem; color: var(--text-main);
+            outline: none; margin-bottom: 10px;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading .btn-text { display: none; }
-        .loading .spinner { display: block; }
+        .bubble-input:focus { border-color: var(--primary-color); background: #fff; }
 
-        /* --- [헤더 & 알림] --- */
-        .header {
-            padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 1px solid #eee; flex-shrink: 0;
+        .bubble-btn {
+            width: 100%; padding: 14px; border: none; border-radius: var(--radius-round);
+            background: var(--primary-color); color: white; font-size: 1rem; font-weight: bold;
+            cursor: pointer; position: relative; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            transition: background 0.2s;
         }
-        .header h2 { font-size: 1.2rem; font-weight: 800; }
+        .bubble-btn:active { opacity: 0.8; }
+        .bubble-btn.secondary { background: #f0f2f5; color: var(--text-sub); }
+        .bubble-btn:disabled { background: #e0e0e0; cursor: not-allowed; }
+
+        .btn-content { transition: opacity 0.2s; }
+        .loading-spinner {
+            position: absolute; width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: #fff; border-radius: 50%;
+            animation: spin 0.8s infinite linear; opacity: 0; transition: opacity 0.3s;
+        }
+        .bubble-btn.is-loading .btn-content { opacity: 0; }
+        .bubble-btn.is-loading .loading-spinner { opacity: 1; }
+
+        .error-msg { color: var(--error-color); font-size: 0.85rem; height: 20px; margin-bottom: 5px; text-align: center; }
         
-        .noti-btn { position: relative; background: none; border: none; font-size: 1.5rem; cursor: pointer; }
-        .red-dot {
-            position: absolute; top: 0; right: 0; width: 10px; height: 10px;
-            background: var(--danger); border-radius: 50%; border: 2px solid white; display: none;
+        /* 토스트 메시지 (친구추가 결과 등) */
+        .toast-msg {
+            color: var(--primary-color); font-size: 0.85rem; margin-top: 8px; text-align: center; display: none;
         }
 
-        /* --- [친구 목록] --- */
-        .list-container { flex: 1; overflow-y: auto; padding: 10px 20px; }
-        .friend-item {
-            display: flex; align-items: center; padding: 15px; margin-bottom: 10px;
-            background: #fff; border-radius: var(--radius-M); box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-            transition: 0.2s;
+        /* --- [화면 전환] --- */
+        .view {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color); display: flex; flex-direction: column;
+            opacity: 0; pointer-events: none; transform: scale(0.98);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 0;
         }
-        .friend-item:active { transform: scale(0.98); background: #f8f9fa; }
+        .view.active { opacity: 1; pointer-events: auto; transform: scale(1); z-index: 10; }
+
+        .header {
+            padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
+            background: #fff; z-index: 20; border-bottom: 1px solid #f0f0f0;
+        }
+        .header h2 { font-size: 1.2rem; font-weight: 700; }
+        .icon-btn { background: none; border: none; cursor: pointer; padding: 5px; }
+
+        /* --- [로그인 & 회원가입] --- */
+        .auth-container { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 40px; }
+        .app-logo { font-size: 2.5rem; font-weight: 900; color: var(--primary-color); margin-bottom: 30px; text-align: center; letter-spacing: -1px; }
+        .link-text { text-align: center; margin-top: 20px; color: var(--text-sub); font-size: 0.85rem; text-decoration: underline; cursor: pointer; }
+        
+        .signup-wrapper { flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column; }
+        .signup-slider { display: flex; width: 300%; height: 100%; transition: transform 0.4s ease; }
+        .signup-step { width: 33.333%; flex-shrink: 0; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+        .step-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 10px; }
+        .step-desc { color: var(--text-sub); margin-bottom: 30px; font-size: 0.95rem; }
+        
+        .terms-box {
+            background: var(--surface-color); padding: 15px; border-radius: 15px; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 12px; cursor: pointer;
+        }
+        .checkbox-custom {
+            width: 24px; height: 24px; border: 2px solid #ddd; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s; background: #fff;
+        }
+        .checkbox-custom svg { width: 14px; height: 14px; fill: white; display: none; }
+        .checkbox-custom.checked { background: var(--primary-color); border-color: var(--primary-color); }
+        .checkbox-custom.checked svg { display: block; }
+
+        /* --- [친구 목록 (카드형)] --- */
+        .list-container { flex: 1; overflow-y: auto; padding: 15px 20px; background: #fbfbfb; }
+        .list-item {
+            display: flex; align-items: center; padding: 16px; margin-bottom: 15px;
+            background: #fff; 
+            border-radius: var(--radius-card); /* 둥근 카드 */
+            box-shadow: var(--shadow-card); /* 그림자 적용 */
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .list-item:hover { transform: translateY(-2px); }
+        .list-item:active { transform: scale(0.98); }
         .avatar {
-            width: 45px; height: 45px; background: #eef1f5; border-radius: 50%;
-            margin-right: 15px; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; color: #666; font-size: 1.1rem;
+            width: 46px; height: 46px; border-radius: 18px; background: #dfe4ea;
+            color: #777; font-weight: bold; display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; margin-right: 15px; flex-shrink: 0;
         }
+
+        /* --- [알림 센터 (전체 화면)] --- */
+        #view-notifications .list-container { background: #fff; }
+        .noti-item {
+            display: flex; flex-direction: column; padding: 15px; 
+            border-bottom: 1px solid #f0f0f0; gap: 10px;
+        }
+        .noti-actions { display: flex; gap: 8px; }
+        .noti-actions button { flex: 1; padding: 10px; font-size: 0.9rem; }
 
         /* --- [채팅방] --- */
-        #chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #fff; }
-        .msg { max-width: 75%; padding: 10px 16px; border-radius: 20px; font-size: 0.95rem; line-height: 1.4; }
-        .msg.received { align-self: flex-start; background: #f0f2f5; border-top-left-radius: 4px; }
-        .msg.sent { align-self: flex-end; background: var(--primary); color: white; border-top-right-radius: 4px; }
-        .chat-input-area {
-            padding: 10px 15px; background: white; border-top: 1px solid #f0f0f0;
-            display: flex; gap: 10px; padding-bottom: max(10px, env(safe-area-inset-bottom));
-        }
-        #send-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none; color: white; flex-shrink: 0; }
+        /* 헤더 높이 줄임 */
+        #view-chat .header { padding: 8px 15px; height: 50px; }
+        #chat-room-name { font-size: 1rem; }
 
-        /* --- [커스텀 모달] --- */
+        #chat-messages {
+            flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+            background: #ffffff;
+        }
+
+        /* 메시지 레이아웃 (스피너 배치를 위한 Flex) */
+        .msg-row { display: flex; width: 100%; align-items: flex-end; }
+        .msg-row.received { justify-content: flex-start; }
+        .msg-row.sent { justify-content: flex-end; }
+
+        .msg {
+            max-width: 75%; padding: 10px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4;
+            word-break: break-word; position: relative;
+        }
+        .msg.received { background: #f1f3f5; color: var(--text-main); border-bottom-left-radius: 4px; }
+        .msg.sent { background: var(--primary-color); color: white; border-bottom-right-radius: 4px; }
+
+        /* 메시지 옆 로딩 스피너 */
+        .msg-spinner {
+            width: 14px; height: 14px; border: 2px solid #ddd; 
+            border-top-color: var(--primary-color); border-radius: 50%;
+            margin-right: 8px; /* 내 메시지 왼쪽에 위치 */
+            animation: spin 0.8s infinite linear;
+            flex-shrink: 0;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .chat-input-area {
+            padding: 8px 12px; background: #ffffff; border-top: 1px solid #eee; display: flex; gap: 8px; align-items: center;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+        }
+        #msg-input { margin: 0; background: #f1f3f5; border: none; height: 42px; padding: 0 16px; flex: 1; }
+        #send-btn {
+            width: 42px; height: 42px; border-radius: 50%;
+            flex-shrink: 0; padding: 0; display: flex; align-items: center; justify-content: center;
+        }
+        #send-btn svg { width: 20px; height: 20px; fill: white; }
+
+        /* 모달 & 닷 */
+        .red-dot {
+            position: absolute; top: 2px; right: 2px; width: 6px; height: 6px;
+            background: #ff4757; border-radius: 50%; display: none;
+        }
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.4); z-index: 100; display: none;
-            align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;
+            align-items: center; justify-content: center;
         }
-        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-overlay.show { display: flex; }
         .modal-box {
-            background: white; width: 85%; max-width: 320px; padding: 25px;
-            border-radius: var(--radius-L); text-align: center; transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 80%; max-width: 300px; background: white; padding: 25px;
+            border-radius: 20px; text-align: center;
         }
-        .modal-overlay.show .modal-box { transform: scale(1); }
-        .modal-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; }
-        .modal-desc { font-size: 0.9rem; color: #666; margin-bottom: 20px; }
-        .modal-btns { display: flex; gap: 10px; }
-
-        /* --- [알림 목록 모달 내부용] --- */
-        .noti-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem;
-        }
-        .noti-actions button {
-            padding: 5px 10px; border-radius: 15px; border: none; font-size: 0.8rem; cursor: pointer; margin-left: 5px;
-        }
-        .btn-accept { background: var(--primary); color: white; }
-        .btn-reject { background: #eee; color: #333; }
-
-        /* 로그인 컨테이너 */
-        .auth-container { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 40px; text-align: center; }
-        .logo { font-size: 2.5rem; font-weight: 900; color: var(--primary); margin-bottom: 40px; letter-spacing: -1px; }
 
     </style>
 </head>
 <body>
 
+<svg style="display:none;">
+    <symbol id="icon-back" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></symbol>
+    <symbol id="icon-bell" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></symbol>
+    <symbol id="icon-arrow-up" viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></symbol>
+</svg>
+
 <div id="custom-modal" class="modal-overlay">
     <div class="modal-box">
-        <div class="modal-title" id="modal-title">알림</div>
-        <div class="modal-desc" id="modal-desc">내용</div>
-        <div class="modal-btns" id="modal-btns">
-            <button class="pill-btn" onclick="closeModal()">확인</button>
-        </div>
-    </div>
-</div>
-
-<div id="noti-modal" class="modal-overlay">
-    <div class="modal-box" style="padding: 20px;">
-        <div class="modal-title">받은 친구 요청</div>
-        <div id="noti-list" style="max-height: 200px; overflow-y: auto; text-align: left; margin: 15px 0;">
-            </div>
-        <button class="pill-btn secondary" onclick="closeNotiModal()">닫기</button>
+        <h3 id="modal-title" style="margin-bottom: 10px;">알림</h3>
+        <p id="modal-desc" style="color:#666; margin-bottom: 20px;">내용</p>
+        <button class="bubble-btn" onclick="closeModal()">확인</button>
     </div>
 </div>
 
 <div id="app">
     <div id="view-login" class="view active">
         <div class="auth-container">
-            <div class="logo">Chat+</div>
-            <input type="text" id="login-id" class="pill-input" placeholder="아이디">
-            <input type="password" id="login-pw" class="pill-input" placeholder="비밀번호">
-            <button id="btn-login" class="pill-btn" onclick="tryLogin()">
-                <span class="btn-text">로그인</span><div class="spinner"></div>
+            <div class="app-logo">Chat+</div>
+            <input type="text" id="login-id" class="bubble-input" placeholder="아이디" oninput="clearError('login-error')">
+            <input type="password" id="login-pw" class="bubble-input" placeholder="비밀번호" oninput="clearError('login-error')">
+            <div id="login-error" class="error-msg"></div>
+            <button id="btn-login" class="bubble-btn" onclick="tryLogin()">
+                <span class="btn-content">로그인</span><div class="loading-spinner"></div>
             </button>
-            <div style="margin-top:20px; color:#888; font-size:0.9rem; text-decoration:underline;" onclick="switchView('view-signup')">회원가입 하기</div>
+            <div class="link-text" onclick="startSignup()">계정이 없으신가요? 회원가입</div>
         </div>
     </div>
 
     <div id="view-signup" class="view">
-        <div class="auth-container">
-            <div class="logo">회원가입</div>
-            <input type="text" id="signup-name" class="pill-input" placeholder="이름 (닉네임)">
-            <input type="text" id="signup-id" class="pill-input" placeholder="아이디">
-            <input type="password" id="signup-pw" class="pill-input" placeholder="비밀번호">
-            <button id="btn-signup" class="pill-btn" onclick="trySignup()">
-                <span class="btn-text">가입완료</span><div class="spinner"></div>
-            </button>
-            <div style="margin-top:20px; color:#888;" onclick="switchView('view-login')">취소</div>
+        <div class="header" style="background:transparent; border:none;">
+            <button class="icon-btn" onclick="cancelSignup()"><svg class="icon"><use href="#icon-back"></use></svg></button>
+            <div style="width:24px;"></div>
+        </div>
+        <div class="signup-wrapper">
+            <div class="signup-slider" id="signup-slider">
+                <div class="signup-step">
+                    <div class="step-title">안녕하세요! 👋</div>
+                    <div class="step-desc">사용하실 이름과 아이디를 알려주세요.</div>
+                    <input type="text" id="signup-name" class="bubble-input" placeholder="이름 (닉네임)" oninput="clearError('signup-error-1')">
+                    <input type="text" id="signup-id" class="bubble-input" placeholder="아이디 (공백 불가)" oninput="clearError('signup-error-1')">
+                    <div id="signup-error-1" class="error-msg"></div>
+                    <button class="bubble-btn" onclick="nextSignupStep(2)">다음</button>
+                </div>
+                <div class="signup-step">
+                    <div class="step-title">보안 설정 🔒</div>
+                    <div class="step-desc">안전한 비밀번호를 설정해주세요.</div>
+                    <input type="password" id="signup-pw" class="bubble-input" placeholder="비밀번호 (공백 불가)" oninput="clearError('signup-error-2')">
+                    <input type="password" id="signup-pw-confirm" class="bubble-input" placeholder="비밀번호 확인" oninput="clearError('signup-error-2')">
+                    <div id="signup-error-2" class="error-msg"></div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="bubble-btn secondary" onclick="prevSignupStep()">이전</button>
+                        <button class="bubble-btn" onclick="nextSignupStep(3)">다음</button>
+                    </div>
+                </div>
+                <div class="signup-step">
+                    <div class="step-title">약관 동의 ✅</div>
+                    <div class="step-desc">마지막 단계입니다.</div>
+                    <div class="terms-box" onclick="toggleTerms()">
+                        <div class="checkbox-custom" id="terms-check"><svg><use href="#icon-check"></use></svg></div>
+                        <span>서비스 이용약관에 동의합니다.</span>
+                    </div>
+                    <div id="signup-error-3" class="error-msg"></div>
+                    <div style="display:flex; gap:10px;">
+                        <button class="bubble-btn secondary" onclick="prevSignupStep()">이전</button>
+                        <button id="btn-signup-complete" class="bubble-btn" onclick="trySignup()">
+                            <span class="btn-content">회원가입 완료</span><div class="loading-spinner"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="view-friends" class="view">
         <div class="header">
-            <h2>친구</h2>
-            <div style="display:flex; gap:15px; align-items: center;">
-                <button class="noti-btn" onclick="openNotiModal()">
-                    🔔<div id="noti-badge" class="red-dot"></div>
+            <h2>Friends</h2>
+            <div style="display:flex; gap:10px;">
+                <button class="icon-btn" onclick="switchView('view-search')">
+                    <svg class="icon"><use href="#icon-search"></use></svg>
                 </button>
-                <button onclick="switchView('view-search')" style="border:none; background:none; font-size:1.5rem; color:var(--primary);">➕</button>
+                <button class="icon-btn" style="position:relative;" onclick="switchView('view-notifications'); checkNotifications();">
+                    <svg class="icon"><use href="#icon-bell"></use></svg>
+                    <div id="noti-badge" class="red-dot"></div>
+                </button>
             </div>
         </div>
-        <div style="padding:15px 20px 5px;">
-            <div style="font-size:1.2rem; font-weight:bold; color:var(--primary);" id="my-name-display"></div>
-            <div style="font-size:0.8rem; color:#888;">접속중</div>
+        <div style="padding: 20px 20px 0; background:#fbfbfb;">
+            <h1 id="my-name-display" style="margin-bottom: 5px;">User</h1>
+            <p style="color:#aaa; font-size:0.9rem;">온라인</p>
         </div>
         <div id="friend-list-ul" class="list-container"></div>
     </div>
 
+    <div id="view-notifications" class="view">
+        <div class="header">
+            <button class="icon-btn" onclick="switchView('view-friends')">
+                <svg class="icon"><use href="#icon-back"></use></svg>
+            </button>
+            <h2>알림</h2>
+            <div style="width:24px;"></div>
+        </div>
+        <div id="noti-list" class="list-container"></div>
+    </div>
+
     <div id="view-search" class="view">
         <div class="header">
-            <button onclick="switchView('view-friends')" style="border:none; background:none; font-size:1.5rem;">←</button>
-            <h2>친구 추가</h2>
+            <button class="icon-btn" onclick="switchView('view-friends')">
+                <svg class="icon"><use href="#icon-back"></use></svg>
+            </button>
+            <h2>친구 찾기</h2>
             <div style="width:24px;"></div>
         </div>
         <div style="padding:20px;">
             <div style="display:flex; gap:10px;">
-                <input type="text" id="search-input" class="pill-input" style="margin-bottom:0;" placeholder="ID 또는 이름 검색">
-                <button class="pill-btn" style="width:80px;" onclick="searchUser()">검색</button>
+                <input type="text" id="search-input" class="bubble-input" placeholder="친구 ID 검색" style="margin:0;">
+                <button class="bubble-btn" style="width:80px;" onclick="searchUser()">검색</button>
             </div>
-            <div id="search-result" style="margin-top:30px; display:none; align-items:center; justify-content:space-between; padding:15px; background:#f9f9f9; border-radius:16px;">
-                <div>
-                    <div id="result-name" style="font-weight:bold;"></div>
-                    <div style="font-size:0.8rem; color:#888;">사용자</div>
+            <div id="search-result" style="margin-top:20px; display:none; background:#fff; padding:20px; border-radius:20px; box-shadow:var(--shadow-card);">
+                <div style="margin-bottom:15px;">
+                    <div id="result-name" style="font-weight:bold; font-size:1.1rem;"></div>
+                    <div style="color:#888; font-size:0.9rem;">사용자</div>
                 </div>
-                <button id="req-btn" class="pill-btn" style="width:auto; padding:8px 15px; font-size:0.9rem;" onclick="sendFriendRequest()">친구 요청</button>
+                <button id="req-btn" class="bubble-btn" onclick="sendFriendRequest()">친구 요청 보내기</button>
+                <div id="req-toast" class="toast-msg">요청을 보냈습니다.</div>
             </div>
         </div>
     </div>
 
     <div id="view-chat" class="view">
         <div class="header">
-            <button onclick="exitChat()" style="border:none; background:none; font-size:1.5rem;">←</button>
-            <h2 id="chat-room-name"></h2>
+            <button class="icon-btn" onclick="exitChat()">
+                <svg class="icon"><use href="#icon-back"></use></svg>
+            </button>
+            <h2 id="chat-room-name">Chat</h2>
             <div style="width:24px;"></div>
         </div>
         <main id="chat-messages"></main>
         <div class="chat-input-area">
-            <input type="text" id="msg-input" class="pill-input" style="margin:0;" placeholder="메시지 입력">
-            <button id="send-btn" onclick="sendMessage()">↑</button>
+            <input type="text" id="msg-input" class="bubble-input" placeholder="메시지 입력">
+            <button id="send-btn" class="bubble-btn" onclick="sendMessage()">
+                <svg><use href="#icon-arrow-up"></use></svg>
+            </button>
         </div>
     </div>
 </div>
 
 <script>
-    // ★ 백엔드 주소 (본인의 PythonAnywhere 주소로 변경하세요)
     const BASE_URL = "https://jaewondev5.pythonanywhere.com";
 
     let myId = null;
@@ -225,76 +346,101 @@
     let currentChatUser = null;
     let foundUser = null;
     let pollInterval = null;
+    let currentSignupStep = 1;
+    let isTermsAgreed = false;
 
-    // --- [UI 유틸리티] ---
+    // --- [유틸리티] ---
     function switchView(id) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     }
 
-    function toggleLoading(btnId, isLoading) {
+    function toggleBtnLoading(btnId, isLoading) {
         const btn = document.getElementById(btnId);
-        if(isLoading) btn.classList.add('loading');
-        else btn.classList.remove('loading');
+        if(isLoading) { btn.disabled = true; btn.classList.add('is-loading'); } 
+        else { btn.disabled = false; btn.classList.remove('is-loading'); }
     }
-
-    function showModal(title, text) {
-        document.getElementById('modal-title').innerText = title;
-        document.getElementById('modal-desc').innerText = text;
-        document.getElementById('custom-modal').classList.add('show');
-    }
+    
+    function showError(elId, msg) { document.getElementById(elId).innerText = msg; }
+    function clearError(elId) { document.getElementById(elId).innerText = ""; }
+    function showModal(t, d) { document.getElementById('modal-title').innerText = t; document.getElementById('modal-desc').innerText = d; document.getElementById('custom-modal').classList.add('show'); }
     function closeModal() { document.getElementById('custom-modal').classList.remove('show'); }
 
-    // --- [1. 인증 (로그인/가입)] ---
+    // --- [회원가입/로그인] ---
+    function startSignup() {
+        document.getElementById('signup-id').value = ''; document.getElementById('signup-name').value = '';
+        document.getElementById('signup-pw').value = ''; document.getElementById('signup-pw-confirm').value = '';
+        clearError('signup-error-1'); clearError('signup-error-2'); clearError('signup-error-3');
+        isTermsAgreed = false; document.getElementById('terms-check').classList.remove('checked');
+        currentSignupStep = 1; moveSignupSlider(1); switchView('view-signup');
+    }
+    function cancelSignup() { switchView('view-login'); }
+    function moveSignupSlider(step) { document.getElementById('signup-slider').style.transform = `translateX(${-(step - 1) * 33.333}%)`; }
+    function hasSpace(s) { return /\s/.test(s); }
+    function toggleTerms() { isTermsAgreed = !isTermsAgreed; document.getElementById('terms-check').classList.toggle('checked'); clearError('signup-error-3'); }
+
+    function nextSignupStep(step) {
+        if(step === 2) {
+            const n = document.getElementById('signup-name').value.trim();
+            const i = document.getElementById('signup-id').value;
+            if(!n) return showError('signup-error-1', '이름 입력');
+            if(!i) return showError('signup-error-1', '아이디 입력');
+            if(hasSpace(i)) return showError('signup-error-1', '아이디 공백 불가');
+            clearError('signup-error-1');
+        }
+        if(step === 3) {
+            const p = document.getElementById('signup-pw').value;
+            const pc = document.getElementById('signup-pw-confirm').value;
+            if(!p) return showError('signup-error-2', '비밀번호 입력');
+            if(hasSpace(p)) return showError('signup-error-2', '비밀번호 공백 불가');
+            if(p !== pc) return showError('signup-error-2', '비밀번호 불일치');
+            clearError('signup-error-2');
+        }
+        currentSignupStep = step; moveSignupSlider(step);
+    }
+    function prevSignupStep() { if(currentSignupStep > 1) { currentSignupStep--; moveSignupSlider(currentSignupStep); } }
+
     async function trySignup() {
-        const id = document.getElementById('signup-id').value;
-        const pw = document.getElementById('signup-pw').value;
-        const name = document.getElementById('signup-name').value;
-        
-        toggleLoading('btn-signup', true);
+        if(!isTermsAgreed) return showError('signup-error-3', '약관 동의 필요');
+        const id = document.getElementById('signup-id').value.trim();
+        const pw = document.getElementById('signup-pw').value.trim();
+        const name = document.getElementById('signup-name').value.trim();
+        if(!id || !pw || !name) return showError('signup-error-3', '정보 확인 필요');
+
+        toggleBtnLoading('btn-signup-complete', true);
         try {
             const res = await fetch(`${BASE_URL}/api/signup`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ user_id: id, password: pw, name: name })
             });
-            toggleLoading('btn-signup', false);
-            if(res.ok) {
-                showModal("성공", "회원가입이 완료되었습니다.");
-                switchView('view-login');
-            } else {
-                const data = await res.json();
-                showModal("오류", data.detail);
-            }
-        } catch(e) { toggleLoading('btn-signup', false); showModal("오류", "서버 연결 실패"); }
+            toggleBtnLoading('btn-signup-complete', false);
+            if(res.ok) { showModal("성공", "회원가입 완료"); switchView('view-login'); }
+            else { const d = await res.json(); showError('signup-error-3', d.detail || "가입 실패"); }
+        } catch(e) { toggleBtnLoading('btn-signup-complete', false); showError('signup-error-3', "서버 오류"); }
     }
 
     async function tryLogin() {
-        const id = document.getElementById('login-id').value;
-        const pw = document.getElementById('login-pw').value;
+        const id = document.getElementById('login-id').value.trim();
+        const pw = document.getElementById('login-pw').value.trim();
+        if(!id || !pw) return showError('login-error', '아이디/비번 입력');
 
-        toggleLoading('btn-login', true);
+        toggleBtnLoading('btn-login', true);
         try {
             const res = await fetch(`${BASE_URL}/api/login`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ user_id: id, password: pw })
             });
-            const data = await res.json();
-            toggleLoading('btn-login', false);
-
+            const d = await res.json();
+            toggleBtnLoading('btn-login', false);
             if(res.ok) {
-                myId = data.user_id;
-                myName = data.name;
+                myId = d.user_id; myName = d.name;
                 document.getElementById('my-name-display').innerText = myName;
-                await loadFriends();
-                startPolling();
-                switchView('view-friends');
-            } else {
-                showModal("실패", data.detail);
-            }
-        } catch(e) { toggleLoading('btn-login', false); showModal("오류", "서버 연결 실패"); }
+                clearError('login-error'); await loadFriends(); startPolling(); switchView('view-friends');
+            } else showError('login-error', d.detail || "로그인 실패");
+        } catch(e) { toggleBtnLoading('btn-login', false); showError('login-error', "서버 오류"); }
     }
 
-    // --- [2. 친구 로직] ---
+    // --- [친구 목록 (카드형)] ---
     async function loadFriends() {
         try {
             const res = await fetch(`${BASE_URL}/api/friends/${myId}`);
@@ -303,30 +449,34 @@
             container.innerHTML = "";
             list.forEach(u => {
                 const div = document.createElement('div');
-                div.className = 'friend-item';
+                div.className = 'list-item';
                 div.onclick = () => enterChat(u.user_id, u.name);
-                div.innerHTML = `<div class="avatar">${u.name[0]}</div>
-                                 <div style="font-weight:bold;">${u.name}</div>`;
+                div.innerHTML = `
+                    <div class="avatar">${u.name[0]}</div>
+                    <div style="flex:1;">
+                        <div style="font-weight:bold; font-size:1.05rem;">${u.name}</div>
+                        <div style="font-size:0.85rem; color:#aaa; margin-top:4px;">터치하여 대화하기</div>
+                    </div>`;
                 container.appendChild(div);
             });
         } catch(e) {}
     }
 
+    // --- [검색 및 요청 (모달 제거)] ---
     async function searchUser() {
-        const query = document.getElementById('search-input').value;
-        if(!query) return;
+        const q = document.getElementById('search-input').value;
+        if(!q) return;
+        document.getElementById('req-toast').style.display = 'none';
         try {
-            const res = await fetch(`${BASE_URL}/api/search/${query}`);
-            const data = await res.json();
+            const res = await fetch(`${BASE_URL}/api/search/${q}`);
+            const d = await res.json();
             if(res.ok) {
-                foundUser = data;
-                document.getElementById('result-name').innerText = data.name;
-                document.getElementById('search-result').style.display = 'flex';
-                document.getElementById('req-btn').innerText = "친구 요청";
-                document.getElementById('req-btn').disabled = false;
-            } else {
-                showModal("알림", "사용자를 찾을 수 없습니다.");
-            }
+                foundUser = d;
+                document.getElementById('result-name').innerText = d.name;
+                document.getElementById('search-result').style.display = 'block';
+                const btn = document.getElementById('req-btn');
+                btn.innerText = "친구 요청 보내기"; btn.disabled = false;
+            } else showModal("알림", "사용자 없음");
         } catch(e) {}
     }
 
@@ -337,29 +487,27 @@
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ my_id: myId, target_id: foundUser.user_id })
             });
-            const data = await res.json();
-            showModal("알림", data.message);
-            if(data.status === 'ok') {
+            const d = await res.json();
+            // 모달 대신 UI 업데이트
+            if(d.status === 'ok' || res.ok) {
                 const btn = document.getElementById('req-btn');
-                btn.innerText = "요청됨";
-                btn.disabled = true;
+                btn.innerText = "요청됨"; btn.disabled = true;
+                const toast = document.getElementById('req-toast');
+                toast.innerText = d.message || "요청을 보냈습니다.";
+                toast.style.display = 'block';
             }
         } catch(e) {}
     }
 
-    // --- [3. 알림 로직] ---
+    // --- [알림 (전체화면)] ---
     async function checkNotifications() {
         try {
             const res = await fetch(`${BASE_URL}/api/notifications/${myId}`);
             const data = await res.json();
             const badge = document.getElementById('noti-badge');
-            if(data.length > 0) {
-                badge.style.display = 'block';
-                renderNotiList(data);
-            } else {
-                badge.style.display = 'none';
-                document.getElementById('noti-list').innerHTML = "<div style='color:#999; text-align:center;'>새로운 알림이 없습니다.</div>";
-            }
+            
+            if(data.length > 0) { badge.style.display = 'block'; renderNotiList(data); } 
+            else { badge.style.display = 'none'; document.getElementById('noti-list').innerHTML = "<div style='color:#ccc; text-align:center; padding:40px;'>새로운 알림이 없습니다.</div>"; }
         } catch(e) {}
     }
 
@@ -370,76 +518,91 @@
             const div = document.createElement('div');
             div.className = 'noti-item';
             div.innerHTML = `
-                <span><b>${n.sender_name}</b>님의 친구 요청</span>
+                <div style="font-size:0.95rem;"><b>${n.sender_name}</b>님의 친구 요청</div>
                 <div class="noti-actions">
-                    <button class="btn-accept" onclick="respondFriend('${n.sender_id}', 'accept')">수락</button>
-                    <button class="btn-reject" onclick="respondFriend('${n.sender_id}', 'reject')">거절</button>
-                </div>
-            `;
+                    <button class="bubble-btn" onclick="respondFriend('${n.sender_id}', 'accept')">수락</button>
+                    <button class="bubble-btn secondary" onclick="respondFriend('${n.sender_id}', 'reject')">거절</button>
+                </div>`;
             list.appendChild(div);
         });
     }
 
     async function respondFriend(targetId, action) {
         try {
-            const res = await fetch(`${BASE_URL}/api/friend/respond`, {
+            await fetch(`${BASE_URL}/api/friend/respond`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ my_id: myId, target_id: targetId, action: action })
             });
-            if(res.ok) {
-                closeNotiModal();
-                checkNotifications(); // 갱신
-                loadFriends(); // 목록 갱신
-            }
+            checkNotifications(); loadFriends();
         } catch(e) {}
     }
 
-    function openNotiModal() {
-        document.getElementById('noti-modal').classList.add('show');
-        checkNotifications();
-    }
-    function closeNotiModal() { document.getElementById('noti-modal').classList.remove('show'); }
-
-    // --- [4. 채팅 로직 (폴링 & 1년치 데이터)] ---
+    // --- [채팅 (Optimistic UI & Spinner)] ---
     function startPolling() {
         if(pollInterval) clearInterval(pollInterval);
-        // 2초마다 알림과 채팅을 확인
         pollInterval = setInterval(() => {
             checkNotifications();
-            if(currentChatUser) loadMessages();
+            if(currentChatUser) loadMessages(false); // false = don't force scroll
         }, 2000);
     }
 
-    async function enterChat(fid, fname) {
+    function enterChat(fid, fname) {
         currentChatUser = fid;
         document.getElementById('chat-room-name').innerText = fname;
-        document.getElementById('chat-messages').innerHTML = ""; // 초기화
+        document.getElementById('chat-messages').innerHTML = "";
         switchView('view-chat');
-        loadMessages(); // 즉시 로드
+        loadMessages(true);
+    }
+    function exitChat() { currentChatUser = null; switchView('view-friends'); }
+
+    // 메시지 렌더링 헬퍼
+    function renderMessageRow(text, type, isTemp = false, tempId = null) {
+        const container = document.getElementById('chat-messages');
+        const row = document.createElement('div');
+        row.className = `msg-row ${type}`;
+        if(isTemp) row.id = `temp-row-${tempId}`;
+
+        // 내가 보낸 메시지(sent)이고 전송 중(isTemp)이면 왼쪽에 스피너 추가
+        if(type === 'sent' && isTemp) {
+            const spinner = document.createElement('div');
+            spinner.className = 'msg-spinner';
+            spinner.id = `spinner-${tempId}`;
+            row.appendChild(spinner);
+        }
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `msg ${type}`;
+        msgDiv.innerText = text;
+        row.appendChild(msgDiv);
+        
+        container.appendChild(row);
+        container.scrollTop = container.scrollHeight;
     }
 
-    function exitChat() {
-        currentChatUser = null;
-        switchView('view-friends');
-    }
-
-    async function loadMessages() {
+    async function loadMessages(forceScroll) {
         if(!currentChatUser) return;
         try {
             const res = await fetch(`${BASE_URL}/api/messages?my_id=${myId}&other_id=${currentChatUser}`);
             const msgs = await res.json();
             
             const container = document.getElementById('chat-messages');
-            container.innerHTML = ""; // 전체 리렌더링 (간단 구현)
+            // 기존 내용 초기화 (간단 구현을 위해) - *주의: 실제 앱에서는 temp 메시지 유지 로직 필요하나 여기선 단순화*
+            // 여기서는 Optimistic Update와 충돌 방지를 위해, 
+            // "서버에서 온 메시지 개수"가 "현재 DOM 메시지 개수(전송중 제외)"와 다를 때만 다시 그리는 식으로 최적화 가능.
+            // 하지만 간단히 하기 위해: 현재 '전송중(isTemp)'인 메시지는 남겨두고 나머지만 다시 그림.
+            
+            const temps = Array.from(container.querySelectorAll('[id^="temp-row-"]'));
+            container.innerHTML = "";
             
             msgs.forEach(m => {
-                const div = document.createElement('div');
-                div.className = `msg ${m.sender === myId ? 'sent' : 'received'}`;
-                div.innerText = m.text;
-                container.appendChild(div);
+                const type = m.sender === myId ? 'sent' : 'received';
+                renderMessageRow(m.text, type);
             });
-            // 스크롤은 항상 아래로? (UX상 사용자가 올리고 있으면 안되지만 여기선 단순하게)
-            // container.scrollTop = container.scrollHeight; 
+            
+            // 전송 중인 임시 메시지들 다시 붙이기
+            temps.forEach(t => container.appendChild(t));
+
+            if(forceScroll) container.scrollTop = container.scrollHeight;
         } catch(e) {}
     }
 
@@ -448,17 +611,35 @@
         const text = input.value.trim();
         if(!text) return;
 
+        // 1. 즉시 화면에 표시 (Optimistic UI)
+        const tempId = Date.now();
+        renderMessageRow(text, 'sent', true, tempId);
+        input.value = ""; // 입력창 비우기
+
         try {
+            // 2. 서버 전송
             await fetch(`${BASE_URL}/api/message/send`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ sender: myId, receiver: currentChatUser, text: text })
             });
-            input.value = "";
-            loadMessages(); // 즉시 갱신
-        } catch(e) {}
+            
+            // 3. 성공 시 스피너 제거
+            const spinner = document.getElementById(`spinner-${tempId}`);
+            if(spinner) spinner.remove();
+            
+            // 임시 ID 제거 (일반 메시지로 전환)
+            const row = document.getElementById(`temp-row-${tempId}`);
+            if(row) row.removeAttribute('id');
+
+            // loadMessages(true); // 폴링이 돌고 있으므로 굳이 즉시 호출 안해도 되지만, 확실히 하려면 호출. 
+            // 다만 호출 시 전체 리렌더링으로 깜빡일 수 있으니 여기선 스피너 제거만으로 완료 처리.
+
+        } catch(e) {
+            // 실패 시 처리 (여기선 간단히 얼럿)
+            alert("전송 실패");
+        }
     }
     
-    // 엔터키 전송
     document.getElementById('msg-input').addEventListener('keypress', (e) => {
         if(e.key === 'Enter') sendMessage();
     });
