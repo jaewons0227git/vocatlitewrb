@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clean Blue Chat</title>
+    <title>Chat+</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap" rel="stylesheet">
+
     <style>
         /* --- [테마 변수] --- */
         :root {
@@ -18,7 +23,12 @@
             --radius-card: 20px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
+        /* 폰트 적용: Google Sans를 최우선으로, 한글은 시스템/고딕 폰트로 폴백 */
+        * { 
+            box-sizing: border-box; margin: 0; padding: 0; 
+            font-family: 'Google Sans', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif; 
+            -webkit-tap-highlight-color: transparent; user-select: none; 
+        }
         body { background: var(--bg-color); height: 100vh; overflow: hidden; color: var(--text-main); }
         input, textarea { user-select: text; }
 
@@ -87,7 +97,6 @@
         }
         .auto-login-label { font-size: 0.9rem; color: #666; }
         
-        /* 약관/자동로그인 공통 체크박스 */
         .checkbox-custom {
             width: 22px; height: 22px; border: 2px solid #ddd; border-radius: 6px;
             display: flex; align-items: center; justify-content: center; transition: 0.2s; background: #fff;
@@ -95,7 +104,7 @@
         .checkbox-custom svg { width: 14px; height: 14px; fill: white; display: none; }
         .checkbox-custom.checked { background: var(--primary-color); border-color: var(--primary-color); }
         .checkbox-custom.checked svg { display: block; }
-        .checkbox-round { border-radius: 50%; } /* 약관용은 원형 */
+        .checkbox-round { border-radius: 50%; }
 
         /* 회원가입 슬라이더 */
         .signup-wrapper { flex: 1; overflow: hidden; position: relative; display: flex; flex-direction: column; }
@@ -468,16 +477,9 @@
         // UI 갱신
         loadFriends(); 
         if(currentChatUser === targetNicknameUser) {
-            document.getElementById('chat-room-name').innerText = newNick || "Chat"; // 채팅방 이름 갱신이 필요하므로 원본 이름을 어디선가 가져와야 하는데..
-            // 간단히 채팅방 닫았다 열거나, 여기서는 텍스트만 업데이트 (원본 이름 유지가 어려우면 그냥 입력값으로)
-            // 더 정확히 하려면 enterChat을 다시 호출하는 게 좋음, 하지만 currentChatUser가 있으니 UI만 업데이트
-            if(!newNick) {
-                // 원래 이름 복구가 필요하지만, API 호출 없이는 힘듦. 
-                // UX상 그냥 "새로고침" 효과를 위해 리로드
-                loadFriends(); 
-            } else {
-                document.getElementById('chat-room-name').innerText = newNick;
-            }
+            document.getElementById('chat-room-name').innerText = newNick || "Chat"; 
+            if(!newNick) loadFriends(); 
+            else document.getElementById('chat-room-name').innerText = newNick;
         }
     }
 
@@ -584,7 +586,7 @@
                 const div = document.createElement('div');
                 div.className = 'list-item';
                 
-                // 롱프레스 이벤트 (모바일 터치 & PC 마우스 대응)
+                // 롱프레스 이벤트
                 let pressTimer;
                 const startPress = () => { pressTimer = setTimeout(() => openNicknameModal(u.user_id), 600); }
                 const cancelPress = () => { clearTimeout(pressTimer); }
@@ -595,7 +597,7 @@
                 div.addEventListener('mouseleave', cancelPress);
                 div.addEventListener('touchend', cancelPress);
                 
-                div.onclick = () => { cancelPress(); enterChat(u.user_id, displayName); }; // 클릭 시 채팅방
+                div.onclick = () => { cancelPress(); enterChat(u.user_id, displayName); };
 
                 div.innerHTML = `
                     <div class="avatar">${displayName[0]}</div>
@@ -691,7 +693,6 @@
 
     function enterChat(fid, displayName) {
         currentChatUser = fid;
-        // 별명 적용된 이름을 표시
         document.getElementById('chat-room-name').innerText = displayName;
         document.getElementById('chat-messages').innerHTML = "";
         switchView('view-chat');
