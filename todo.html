@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>reminder ToDO</title>
+    <style>
+        /* 1. 모던 화이트 테마 설정 */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --table-header-bg: #f7f7f7;
+            --accent-color: #222222; /* 진한 회색/검정 */
+            --disabled-color: #cccccc;
+            --success-color: #4caf50;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* 한 화면에 고정 */
+        }
+
+        /* 2. 메인 컨테이너 */
+        .container {
+            width: 90%;
+            max-width: 800px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: left;
+            color: var(--accent-color);
+            letter-spacing: -0.5px;
+        }
+
+        /* 3. 모던한 표 스타일 */
+        .table-wrapper {
+            flex: 1;
+            overflow-y: auto; /* 내용이 많으면 스크롤 */
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead {
+            background-color: var(--table-header-bg);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 15px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s;
+        }
+
+        tr:hover td {
+            background-color: #fafafa;
+        }
+
+        /* 완료된 줄 스타일 */
+        tr.completed td {
+            background-color: #f0fdf4; /* 아주 연한 초록색 */
+            opacity: 0.6;
+        }
+        
+        tr.completed input {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        /* 입력 필드 */
+        input {
+            width: 100%;
+            padding: 8px 0;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            color: var(--text-color);
+            outline: none;
+        }
+
+        input::placeholder {
+            color: #bbb;
+        }
+
+        input[type="number"] {
+            font-family: monospace; /* 숫자는 고정폭 폰트 */
+        }
+
+        /* 버튼 스타일 */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-start {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-start:hover {
+            background-color: #000;
+        }
+
+        .btn-start:disabled {
+            background-color: var(--disabled-color);
+            cursor: not-allowed;
+            color: #fff;
+        }
+
+        .btn-done {
+            background-color: transparent;
+            color: var(--success-color);
+            cursor: default;
+        }
+
+        /* 4. 모달 스타일 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9); /* 흰색 반투명 */
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .modal-status {
+            font-size: 1rem;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .modal-task {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 40px;
+        }
+
+        .timer-display {
+            font-size: 5rem;
+            font-weight: 300;
+            font-family: monospace; /* 숫자 간격 일정하게 */
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            letter-spacing: -2px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #eee;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 100%;
+            transition: width 1s linear;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>TASK FLOW</h1>
+        
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">No.</th>
+                        <th style="width: 60%;">Task</th>
+                        <th style="width: 20%;">Time (Min)</th>
+                        <th style="width: 15%;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="task-tbody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-status">Now Working On</div>
+            <div id="modal-task-text" class="modal-task">Task Name</div>
+            <div id="timer-text" class="timer-display">00:00</div>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill"></div>
+            </div>
+            <p style="color:#aaa; font-size: 0.8rem; margin-top:20px;">시간이 종료되면 자동으로 다음 단계로 넘어갑니다.</p>
+        </div>
+    </div>
+
+    <script>
+        const ROW_COUNT = 8; // 생성할 줄 수
+        const tbody = document.getElementById('task-tbody');
+        let currentActiveIndex = 0; // 현재 활성화된 줄 인덱스
+        let timerInterval;
+
+        // 1. 초기화: 테이블 행 생성
+        function initTable() {
+            for (let i = 0; i < ROW_COUNT; i++) {
+                const tr = document.createElement('tr');
+                tr.id = `row-${i}`;
+                
+                // 첫번째 줄만 활성화, 나머지는 버튼 비활성화
+                const isDisabled = i === 0 ? '' : 'disabled';
+                
+                tr.innerHTML = `
+                    <td style="color:#999;">${i + 1}</td>
+                    <td><input type="text" class="input-task" placeholder="할 일을 입력하세요"></td>
+                    <td><input type="number" class="input-time" placeholder="분" min="1"></td>
+                    <td>
+                        <button class="btn btn-start" id="btn-${i}" ${isDisabled} onclick="startTask(${i})">
+                            시작
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+
+        // 2. 타이머 시작 로직
+        function startTask(index) {
+            const row = document.getElementById(`row-${index}`);
+            const taskName = row.querySelector('.input-task').value;
+            const timeVal = row.querySelector('.input-time').value;
+
+            if (!taskName) {
+                alert("할 일을 입력해주세요.");
+                return;
+            }
+            if (!timeVal || timeVal <= 0) {
+                alert("시간을 올바르게 입력해주세요.");
+                return;
+            }
+
+            // 모달 열기
+            openModal(taskName, timeVal, index);
+        }
+
+        // 3. 모달 및 타이머 제어
+        function openModal(taskName, minutes, index) {
+            const modal = document.getElementById('modal');
+            const taskText = document.getElementById('modal-task-text');
+            const timerText = document.getElementById('timer-text');
+            const progressFill = document.getElementById('progress-fill');
+
+            modal.style.display = 'flex';
+            taskText.innerText = taskName;
+
+            let totalSeconds = parseInt(minutes) * 60;
+            let initialSeconds = totalSeconds;
+
+            // 초기 화면 세팅
+            updateTimerUI(totalSeconds, initialSeconds);
+
+            // 기존 타이머 제거
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                totalSeconds--;
+                updateTimerUI(totalSeconds, initialSeconds);
+
+                // 시간이 다 되었을 때 (강제 종료)
+                if (totalSeconds < 0) {
+                    clearInterval(timerInterval);
+                    completeTask(index); // 완료 처리 함수 호출
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI(currentSec, totalSec) {
+            if (currentSec < 0) currentSec = 0;
+            
+            const m = Math.floor(currentSec / 60);
+            const s = currentSec % 60;
+            const formattedTime = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            
+            document.getElementById('timer-text').innerText = formattedTime;
+
+            // 프로그레스 바 줄어들기
+            const percent = (currentSec / totalSec) * 100;
+            document.getElementById('progress-fill').style.width = `${percent}%`;
+        }
+
+        // 4. 완료 처리 및 다음 단계 잠금 해제
+        function completeTask(index) {
+            // 모달 닫기
+            document.getElementById('modal').style.display = 'none';
+
+            // 현재 행 완료 처리
+            const currentRow = document.getElementById(`row-${index}`);
+            currentRow.classList.add('completed');
+            
+            const currentBtn = document.getElementById(`btn-${index}`);
+            currentBtn.innerText = "완료";
+            currentBtn.className = "btn btn-done";
+            currentBtn.disabled = true;
+            
+            // 입력창 잠금 (선택사항)
+            currentRow.querySelector('.input-task').readOnly = true;
+            currentRow.querySelector('.input-time').readOnly = true;
+
+            // 다음 행 활성화 (존재한다면)
+            const nextIndex = index + 1;
+            if (nextIndex < ROW_COUNT) {
+                const nextBtn = document.getElementById(`btn-${nextIndex}`);
+                nextBtn.disabled = false;
+                
+                // 다음 행에 포커스 (편의성)
+                // document.getElementById(`row-${nextIndex}`).querySelector('.input-task').focus();
+            } else {
+                alert("모든 할 일을 마쳤습니다. 고생하셨어요!");
+            }
+        }
+
+        // 실행
+        initTable();
+
+    </script>
+</body>
+</html>
