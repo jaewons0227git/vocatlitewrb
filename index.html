@@ -41,17 +41,15 @@
             transition: padding-top 0.3s ease;
         }
 
-        /* 친구 모드: 상단바 숨김, 패딩 제거, 스크롤 방지 */
         body.friends-mode {
             padding-top: 0 !important;
-            padding-bottom: 0 !important; /* 하단 패딩도 제거 */
+            padding-bottom: 0 !important; 
             overflow: hidden !important; 
             height: 100vh; 
             width: 100%;
-            position: fixed; /* 화면 고정 */
+            position: fixed; 
         }
 
-        /* 로딩 오버레이 */
         #loadingOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #ffffff; z-index: 9999;
@@ -67,7 +65,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 토스트 알림 */
         .toast {
             position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.8); color: white;
@@ -79,7 +76,6 @@
         }
         .toast.show { opacity: 1; }
 
-        /* --- 상단바 --- */
         .top-bar {
             position: fixed; top: 0; width: 100%; max-width: 600px;
             height: 60px; background: rgba(255, 255, 255, 0.9);
@@ -123,7 +119,6 @@
         #backBtn { display: none; }
         #exportBtnTop { display: none; font-size: 13px; font-weight: 500; width: auto; padding: 0 12px; }
 
-        /* --- 하단 내비게이션 --- */
         .bottom-nav {
             position: fixed; bottom: 0; width: 100%; max-width: 600px;
             height: 80px; background: #ffffff; 
@@ -186,18 +181,13 @@
         }
         .nav-item.active .icon-settings span { background-color: var(--text-dark); }
 
-        /* --- 컨텐츠 영역 --- */
         .container { 
             width: 100%; max-width: 550px; padding: 16px; 
             transition: padding 0.3s;
         }
         
-        /* 친구 모드: 컨테이너 여백 제거, 스크롤 방지, 전체화면 */
         .container.friends-mode {
-            padding: 0;
-            max-width: 100%;
-            height: 100%;
-            overflow: hidden;
+            padding: 0; max-width: 100%; height: 100%; overflow: hidden;
         }
 
         .page { 
@@ -207,39 +197,17 @@
         .page.active { display: block; } 
         .page.show { opacity: 1; transform: translateY(0); }
         
-        /* [수정] 채팅 탭: position fixed로 하단바 위까지만 오도록 강제 고정 */
         #tab-friends {
-            position: fixed; /* 뷰포트 기준 고정 */
-            top: 0; 
-            left: 0; 
-            width: 100%;
-            /* 하단바 높이(80px)를 뺀 나머지 공간만 차지하도록 설정 */
-            bottom: 80px; 
-            height: auto; /* bottom 속성으로 높이 결정 */
-            z-index: 1000; /* 하단바(2000)보다 아래, 내용물보다는 위 */
-            background: white;
-            padding: 0;
-            margin: 0;
-            overflow: hidden;
+            position: fixed; top: 0; left: 0; width: 100%; bottom: 80px; 
+            height: auto; z-index: 1000; background: white; padding: 0; margin: 0; overflow: hidden;
         }
 
-        .chat-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-            overflow: hidden;
-        }
+        .chat-frame { width: 100%; height: 100%; border: none; display: block; overflow: hidden; }
 
-        /* --- 단어장 카드 --- */
         .card-book {
-            background: white; padding: 20px;
-            border-radius: var(--card-radius);
-            border: 1px solid var(--border-color);
-            margin-bottom: 12px; position: relative;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.02);
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
+            background: white; padding: 20px; border-radius: var(--card-radius);
+            border: 1px solid var(--border-color); margin-bottom: 12px; position: relative;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.02); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer;
         }
         .card-book:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
 
@@ -258,25 +226,16 @@
         .circle-inner { width: 34px; height: 34px; background: white; border-radius: 50%; position: absolute; display: flex; align-items: center; justify-content: center; }
         .circle-text { font-size: 10px; font-weight: 700; color: var(--text-dark); }
 
-        /* --- 단어 상세 --- */
         .card-word {
-            background: transparent; padding: 16px 8px;
-            border-radius: 0; border: none;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 0; position: relative;
-            box-shadow: none; transition: background-color 0.2s;
-            padding-right: 50px; min-height: 80px;
+            background: transparent; padding: 16px 8px; border-radius: 0; border: none;
+            border-bottom: 1px solid var(--border-color); margin-bottom: 0; position: relative;
+            box-shadow: none; transition: background-color 0.2s; padding-right: 50px; min-height: 80px;
             display: flex; flex-direction: column; justify-content: center;
         }
-        .card-word:active { transform: none; background-color: #fafafa; }
         
         .word-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
         .word-eng { font-weight: 700; font-size: 1.25rem; color: var(--text-dark); transition: opacity 0.2s; }
-        .tts-btn {
-            background: none; border: none; cursor: pointer; color: var(--text-gray);
-            display: flex; align-items: center; padding: 4px; border-radius: 50%;
-        }
-        .tts-btn:active { background: #e8e8ed; color: var(--accent-blue); }
+        .tts-btn { background: none; border: none; cursor: pointer; color: var(--text-gray); display: flex; align-items: center; padding: 4px; border-radius: 50%; }
         .tts-icon { width: 18px; height: 18px; fill: currentColor; }
 
         .word-kor { color: var(--text-gray); font-size: 0.95rem; line-height: 1.4; transition: opacity 0.2s; display: block; }
@@ -284,37 +243,22 @@
         .masked { background-color: #f0f0f5; color: transparent !important; border-radius: 6px; user-select: none; }
         .masked .tts-btn { visibility: hidden; }
 
-        .word-edit-btn {
-            position: absolute; bottom: 12px; right: 4px;
-            background: none; border: none;
-            color: var(--text-gray); padding: 6px;
-            font-size: 12px; font-weight: 500; cursor: pointer; z-index: 10;
-        }
+        .word-edit-btn { position: absolute; bottom: 12px; right: 4px; background: none; border: none; color: var(--text-gray); padding: 6px; font-size: 12px; font-weight: 500; cursor: pointer; z-index: 10; }
 
         .status-check {
-            position: absolute; top: 16px; right: 4px;
-            width: 26px; height: 26px; cursor: pointer; 
+            position: absolute; top: 16px; right: 4px; width: 26px; height: 26px; cursor: pointer; 
             -webkit-mask-image: url('https://i.postimg.cc/MTW8GrjS/1000020262-removebg-preview.png');
             mask-image: url('https://i.postimg.cc/MTW8GrjS/1000020262-removebg-preview.png');
-            -webkit-mask-size: contain; mask-size: contain;
-            -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-            -webkit-mask-position: center; mask-position: center;
-            background-color: #d1d1d6;
-            transition: background-color 0.2s ease, transform 0.2s;
+            -webkit-mask-size: contain; mask-size: contain; background-color: #d1d1d6;
         }
-        .status-check:active { transform: scale(0.8); }
         .status-check.checked-1 { background-color: var(--status-pink); }
         .status-check.checked-2 { background-color: var(--status-vivid-blue); }
-        .status-check::after { display: none; }
 
-        /* --- 모달 및 폼 스타일 --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; display: none; flex-direction: column;
-            z-index: 3000; padding: 24px;
-            opacity: 0; transform: scale(0.95);
-            transition: opacity 0.25s, transform 0.25s;
-            overflow-y: auto;
+            z-index: 3000; padding: 24px; opacity: 0; transform: scale(0.95);
+            transition: opacity 0.25s, transform 0.25s; overflow-y: auto;
         }
         .modal.open { opacity: 1; transform: scale(1); }
 
@@ -332,103 +276,45 @@
         .btn-remove { 
             width: 48px; height: 48px; border-radius: 12px; border: none; 
             background: #ffe5e5; color: #ff3b30; font-size: 20px; font-weight: bold;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-        .btn-remove:active { opacity: 0.7; }
-
-        .btn-full { 
-            width: 100%; padding: 16px; border-radius: 14px; 
-            border: none; background: var(--text-dark); color: white; 
-            font-weight: 600; margin-top: 10px; cursor: pointer; font-size: 15px; 
-        }
-        .btn-sub { background: var(--input-bg); color: var(--text-dark); border: none; }
-        .btn-add-meaning { 
-            width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--text-gray); 
-            background: white; color: var(--text-gray); margin-bottom: 10px; cursor: pointer; 
-        }
-        .btn-find { 
-            background: transparent; color: var(--accent-blue); 
-            border: 1px solid var(--accent-blue); margin-top: 8px; 
-        }
-
-        /* --- FAB & Bottom Sheet --- */
-        .fab-container {
-            position: fixed; bottom: 40px; right: 20px;
-            z-index: 2100; display: none;
-        }
-        .fab-btn {
-            width: 44px; height: 44px; background: white; border-radius: 50%;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; border: none; font-size: 20px; color: var(--text-dark);
-            transition: transform 0.2s;
         }
-        .fab-btn:active { transform: scale(0.9); }
 
-        .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4); z-index: 3500;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
-        }
+        .btn-full { width: 100%; padding: 16px; border-radius: 14px; border: none; background: var(--text-dark); color: white; font-weight: 600; margin-top: 10px; cursor: pointer; font-size: 15px; }
+        .btn-sub { background: var(--input-bg); color: var(--text-dark); }
+        .btn-add-meaning { width: 100%; padding: 12px; border-radius: 12px; border: 1px dashed var(--text-gray); background: white; color: var(--text-gray); margin-bottom: 10px; cursor: pointer; }
+        .btn-find { background: transparent; color: var(--accent-blue); border: 1px solid var(--accent-blue); margin-top: 8px; }
+
+        .fab-container { position: fixed; bottom: 40px; right: 20px; z-index: 2100; display: none; }
+        .fab-btn { width: 44px; height: 44px; background: white; border-radius: 50%; box-shadow: 0 4px 14px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; font-size: 20px; }
+
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 3500; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .overlay.active { opacity: 1; pointer-events: auto; }
 
         .bottom-sheet {
             position: fixed; bottom: 0; left: 0; right: 0; width: 100%;
-            background: white; z-index: 4000;
-            border-radius: 24px 24px 0 0;
-            padding: 24px 24px 40px 24px;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-            transform: translateY(120%);
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            max-width: 600px; margin: 0 auto;
-            display: flex; flex-direction: column;
+            background: white; z-index: 4000; border-radius: 24px 24px 0 0;
+            padding: 24px 24px 40px 24px; transform: translateY(120%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); max-width: 600px; margin: 0 auto;
         }
         .bottom-sheet.active { transform: translateY(0); }
 
-        .sheet-header {
-            font-size: 18px; font-weight: 700; margin-bottom: 20px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .sheet-section-title {
-            font-size: 13px; font-weight: 600; color: var(--text-gray); margin-bottom: 12px; margin-top: 20px;
-        }
+        .sheet-header { font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .sheet-section-title { font-size: 13px; font-weight: 600; color: var(--text-gray); margin-bottom: 12px; margin-top: 20px; }
         .chip-container { display: flex; gap: 10px; flex-wrap: wrap; }
-        .chip {
-            padding: 10px 16px; border-radius: 20px;
-            background: var(--input-bg); border: none;
-            font-size: 14px; font-weight: 500; color: var(--text-dark);
-            cursor: pointer; transition: background 0.2s, color 0.2s;
-            border: 1px solid transparent;
-        }
-        .chip.selected {
-            background: var(--text-dark); color: white; border-color: var(--text-dark);
-        }
+        .chip { padding: 10px 16px; border-radius: 20px; background: var(--input-bg); border: none; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .chip.selected { background: var(--text-dark); color: white; }
 
-        .menu-btn-sheet {
-            background: var(--input-bg); border: none;
-            padding: 16px; border-radius: 16px;
-            font-size: 16px; font-weight: 600; color: var(--text-dark);
-            text-align: left; cursor: pointer; margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .menu-btn-sheet:active { background: #e8e8ed; }
+        .menu-btn-sheet { background: var(--input-bg); border: none; padding: 16px; border-radius: 16px; font-size: 16px; font-weight: 600; text-align: left; cursor: pointer; margin-bottom: 12px; width: 100%; display: flex; justify-content: space-between; }
         .menu-btn-sheet.danger { color: #ff3b30; background: #ffe5e5; }
 
-        /* 설정 페이지 */
-        .settings-container {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 60vh; text-align: center;
-        }
+        .settings-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 60vh; text-align: center; }
         .app-name-large { font-size: 28px; font-weight: 800; color: var(--text-dark); margin-bottom: 8px; }
         .app-version { font-size: 14px; color: var(--text-gray); font-family: monospace; }
-        .app-author { font-size: 13px; color: #b0b0b5; margin-top: 6px; }
-
     </style>
 </head>
 <body>
 
     <div id="loadingOverlay"><div class="loader"></div></div>
-    
     <div id="toast" class="toast">알림</div>
 
     <div class="top-bar">
@@ -437,7 +323,7 @@
         <div class="search-container">
             <input type="text" class="search-input" id="searchInput" placeholder="단어 검색" oninput="handleSearch()">
         </div>
-        <button id="exportBtnTop" class="top-btn export" onclick="openExportModal()">내보내기</button>
+        <button id="exportBtnTop" class="top-btn" onclick="openExportModal()">내보내기</button>
         <button id="addBtnTop" class="top-btn" onclick="handleTopPlus()">+</button>
     </div>
 
@@ -446,15 +332,12 @@
             <input type="file" id="fileInput" accept=".doc,.json,.txt" style="display:none" onchange="handleImport(event)">
             <div id="vocabList"></div>
         </div>
-
         <div id="voca-detail" class="page">
             <div id="wordContainer"></div>
         </div>
-
         <div id="tab-friends" class="page">
             <iframe id="chatIframe" class="chat-frame" scrolling="no"></iframe>
         </div>
-        
         <div id="tab-settings" class="page">
             <div class="settings-container">
                 <div class="app-name-large">WordVoca</div>
@@ -471,16 +354,12 @@
     <div id="menuOverlay" class="overlay" onclick="closeAllBottomSheets()"></div>
 
     <div id="viewSettingsSheet" class="bottom-sheet">
-        <div class="sheet-header">
-            <span>보기 설정</span>
-            <button onclick="closeAllBottomSheets()" style="border:none; background:none; font-size:16px; color:var(--accent-blue); font-weight:600;">완료</button>
-        </div>
+        <div class="sheet-header"><span>보기 설정</span><button onclick="closeAllBottomSheets()" style="border:none; background:none; color:var(--accent-blue); font-weight:600;">완료</button></div>
         <div class="sheet-section-title">보기 필터</div>
         <div class="chip-container">
             <button class="chip selected" id="filter-all" onclick="toggleFilter('all')">전체</button>
             <button class="chip" id="filter-2" onclick="toggleFilter(2)">암기</button>
             <button class="chip" id="filter-1" onclick="toggleFilter(1)">미암기</button>
-            <button class="chip" id="filter-0" onclick="toggleFilter(0)">해당없음</button>
         </div>
         <div class="sheet-section-title">가리기 모드</div>
         <div class="chip-container">
@@ -488,76 +367,44 @@
             <button class="chip" id="mask-word" onclick="setMasking('word')">단어 가리기</button>
             <button class="chip" id="mask-meaning" onclick="setMasking('meaning')">뜻 가리기</button>
         </div>
-        <div class="sheet-section-title">일괄 상태 변경</div>
-        <div class="chip-container" style="margin-bottom:10px;">
-            <button class="chip" onclick="setAllStatus(2)">전체 암기</button>
-            <button class="chip" onclick="setAllStatus(1)">전체 미암기</button>
-            <button class="chip" onclick="setAllStatus(0)">전체 초기화</button>
-        </div>
     </div>
 
     <div id="addMenuSheet" class="bottom-sheet">
-        <div class="sheet-header">
-            <span>추가하기</span>
-            <button onclick="closeAllBottomSheets()" style="border:none; background:none; font-size:16px; color:var(--accent-blue); font-weight:600;">닫기</button>
-        </div>
+        <div class="sheet-header"><span>추가하기</span><button onclick="closeAllBottomSheets()" style="border:none; background:none; color:var(--accent-blue); font-weight:600;">닫기</button></div>
         <button class="menu-btn-sheet" onclick="closeAllBottomSheets(); openVocabForm();">새 단어장 만들기</button>
         <button class="menu-btn-sheet" onclick="closeAllBottomSheets(); document.getElementById('fileInput').click();">파일 불러오기</button>
     </div>
 
     <div id="bookMenuSheet" class="bottom-sheet">
-        <div class="sheet-header">
-            <span id="bookMenuTitle">단어장 옵션</span>
-            <button onclick="closeAllBottomSheets()" style="border:none; background:none; font-size:16px; color:var(--accent-blue); font-weight:600;">닫기</button>
-        </div>
+        <div class="sheet-header"><span id="bookMenuTitle">단어장 옵션</span><button onclick="closeAllBottomSheets()" style="border:none; background:none; color:var(--accent-blue); font-weight:600;">닫기</button></div>
         <button class="menu-btn-sheet" onclick="closeAllBottomSheets(); openVocabForm(contextVocabIdx);">이름 변경</button>
         <button class="menu-btn-sheet" onclick="closeAllBottomSheets(); openExportModal(contextVocabIdx);">내보내기 / 공유</button>
         <button class="menu-btn-sheet danger" onclick="closeAllBottomSheets(); deleteVocab(contextVocabIdx);">단어장 삭제</button>
     </div>
 
     <div id="exportSheet" class="bottom-sheet">
-        <div class="sheet-header">
-            <span>내보내기</span>
-            <button onclick="closeAllBottomSheets()" style="border:none; background:none; font-size:16px; color:var(--accent-blue); font-weight:600;">취소</button>
-        </div>
-        <button class="menu-btn-sheet" onclick="handleExportAction('share')">공유하기 / 링크 복사 (PC)</button>
+        <div class="sheet-header"><span>내보내기</span><button onclick="closeAllBottomSheets()" style="border:none; background:none; color:var(--accent-blue); font-weight:600;">취소</button></div>
+        <button class="menu-btn-sheet" onclick="handleExportAction('share')">공유하기 / 링크 복사</button>
         <button class="menu-btn-sheet" onclick="handleExportAction('save')">파일로 저장</button>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('voca', this)">
-            <div class="nav-icon icon-voca"></div>
-            <span>단어장</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('friends', this)">
-            <div class="nav-icon icon-friends"></div>
-            <span>친구</span>
-        </div>
-        <div class="nav-item" onclick="switchTab('settings', this)">
-            <div class="nav-icon icon-settings"><span></span><span></span><span></span></div>
-            <span>설정</span>
-        </div>
+        <div class="nav-item active" onclick="switchTab('voca', this)"><div class="nav-icon icon-voca"></div><span>단어장</span></div>
+        <div class="nav-item" onclick="switchTab('friends', this)"><div class="nav-icon icon-friends"></div><span>친구</span></div>
+        <div class="nav-item" onclick="switchTab('settings', this)"><div class="icon-settings"><span></span><span></span><span></span></div><span>설정</span></div>
     </div>
 
     <div id="vocabForm" class="modal">
-        <div class="modal-header"><h3 style="margin:0">단어장 정보</h3></div>
+        <div class="modal-header"><h3>단어장 정보</h3></div>
         <div class="input-group"><label>이름</label><input type="text" id="v_name" placeholder="예: 토익 필수 영단어"></div>
         <button class="btn-full" onclick="saveVocab()">완료</button>
         <button class="btn-full btn-sub" onclick="closeModalWithAnim('vocabForm')">취소</button>
     </div>
 
     <div id="wordForm" class="modal">
-        <div class="modal-header"><h3 style="margin:0">단어 추가/수정</h3></div>
-        <div class="input-group">
-            <label>영어</label>
-            <input type="text" id="w_word" placeholder="영단어">
-            <button class="btn-full btn-find" id="findBtn" onclick="fetchMeaning()">뜻 자동 완성 (Google)</button>
-        </div>
-        <div class="input-group">
-            <label>뜻</label>
-            <div id="meaningsContainer"></div>
-            <button class="btn-add-meaning" onclick="addMeaningInput()">+ 뜻 추가</button>
-        </div>
+        <div class="modal-header"><h3>단어 추가/수정</h3></div>
+        <div class="input-group"><label>영어</label><input type="text" id="w_word" placeholder="영단어"><button class="btn-full btn-find" id="findBtn" onclick="fetchMeaning()">뜻 자동 완성 (Google)</button></div>
+        <div class="input-group"><label>뜻</label><div id="meaningsContainer"></div><button class="btn-add-meaning" onclick="addMeaningInput()">+ 뜻 추가</button></div>
         <button class="btn-full" onclick="saveWord()">저장</button>
         <button class="btn-full btn-sub" id="delWordBtn" style="color:#ff3b30; display:none;" onclick="deleteWord()">삭제</button>
         <button class="btn-full btn-sub" onclick="closeModalWithAnim('wordForm')">취소</button>
@@ -583,26 +430,23 @@
             const overlay = document.getElementById('loadingOverlay');
             overlay.style.opacity = '0';
             setTimeout(() => { overlay.style.display = 'none'; }, 500);
-            if(window.speechSynthesis) window.speechSynthesis.getVoices();
+            renderList();
         });
 
         function showToast(msg) {
             const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.classList.add('show');
+            t.innerText = msg; t.classList.add('show');
             if(t.timer) clearTimeout(t.timer);
             t.timer = setTimeout(() => { t.classList.remove('show'); }, 2000);
         }
 
         function openModalWithAnim(id) {
             const el = document.getElementById(id);
-            el.style.display = 'flex';
-            void el.offsetWidth; el.classList.add('open');
+            el.style.display = 'flex'; void el.offsetWidth; el.classList.add('open');
         }
         function closeModalWithAnim(id) {
             const el = document.getElementById(id);
-            el.classList.remove('open');
-            setTimeout(() => { el.style.display = 'none'; }, 250); 
+            el.classList.remove('open'); setTimeout(() => { el.style.display = 'none'; }, 250); 
         }
         function switchPageWithAnim(hideId, showId) {
             const hideEl = document.getElementById(hideId);
@@ -610,35 +454,8 @@
             hideEl.classList.remove('show');
             setTimeout(() => {
                 hideEl.classList.remove('active');
-                showEl.classList.add('active');
-                void showEl.offsetWidth; showEl.classList.add('show');
+                showEl.classList.add('active'); void showEl.offsetWidth; showEl.classList.add('show');
             }, 300);
-        }
-
-        function openViewSettings() {
-            document.getElementById('menuOverlay').classList.add('active');
-            document.getElementById('viewSettingsSheet').classList.add('active');
-            updateSheetUI();
-        }
-        function openAddMenuSheet() {
-            document.getElementById('menuOverlay').classList.add('active');
-            document.getElementById('addMenuSheet').classList.add('active');
-        }
-        function openBookMenuSheet(idx) {
-            contextVocabIdx = idx;
-            document.getElementById('bookMenuTitle').innerText = savedVocabs[idx].vocabulary.name;
-            document.getElementById('menuOverlay').classList.add('active');
-            document.getElementById('bookMenuSheet').classList.add('active');
-        }
-        function openExportModal(idx = -1) {
-            if(idx > -1) contextVocabIdx = idx;
-            else if(currentVocabIdx > -1) contextVocabIdx = currentVocabIdx;
-            
-            closeAllBottomSheets();
-            setTimeout(() => {
-                document.getElementById('menuOverlay').classList.add('active');
-                document.getElementById('exportSheet').classList.add('active');
-            }, 100);
         }
 
         function closeAllBottomSheets() {
@@ -646,284 +463,70 @@
             document.querySelectorAll('.bottom-sheet').forEach(sheet => sheet.classList.remove('active'));
         }
 
-        function updateSheetUI() {
-            document.querySelectorAll('.chip-container .chip').forEach(c => c.classList.remove('selected'));
-            activeFilters.forEach(f => {
-                const el = document.getElementById('filter-' + f);
-                if(el) el.classList.add('selected');
-            });
-            document.getElementById('mask-' + maskingMode).classList.add('selected');
-        }
-
-        function toggleFilter(filter) {
-            if (filter === 'all') { activeFilters.clear(); activeFilters.add('all'); } 
-            else {
-                if (activeFilters.has('all')) activeFilters.delete('all');
-                if (activeFilters.has(filter)) activeFilters.delete(filter);
-                else activeFilters.add(filter);
-                if (activeFilters.size === 0) activeFilters.add('all');
-            }
-            updateSheetUI(); renderWords();
-        }
-
-        function setMasking(mode) {
-            maskingMode = mode; updateSheetUI(); renderWords();
-        }
-
-        function setAllStatus(status) {
-            if(currentVocabIdx === -1) return;
-            const v = savedVocabs[currentVocabIdx];
-            v.corpusList.forEach(w => w.status = status);
-            saveAndRefresh(false);
-            renderWords();
-            const statusText = status === 2 ? "암기 완료" : (status === 1 ? "미암기" : "초기화");
-            showToast(`모든 단어가 ${statusText} 상태로 변경되었습니다.`);
-            closeAllBottomSheets();
-        }
-
         function renderList() {
             const listDiv = document.getElementById('vocabList');
             listDiv.innerHTML = '';
-            
             if (savedVocabs.length === 0) {
-                listDiv.innerHTML = `<div style="text-align:center; color:var(--text-gray); margin-top:50px;">
-                    <p>단어장이 없습니다.<br>우측 상단 + 버튼을 눌러 만들어보세요.</p>
-                </div>`;
+                listDiv.innerHTML = `<div style="text-align:center; color:var(--text-gray); margin-top:50px;"><p>단어장이 없습니다.<br>우측 상단 + 버튼을 눌러보세요.</p></div>`;
                 return;
             }
-
             savedVocabs.forEach((v, idx) => {
                 const total = v.corpusList.length;
                 const memorized = v.corpusList.filter(w => w.status === 2).length;
                 const percent = total === 0 ? 0 : Math.round((memorized / total) * 100);
-                const chartColor = 'var(--status-pink)'; 
-                const chartStyle = `background: conic-gradient(${chartColor} 0% ${percent}%, #f0f0f5 ${percent}% 100%);`;
+                const chartStyle = `background: conic-gradient(var(--status-pink) 0% ${percent}%, #f0f0f5 ${percent}% 100%);`;
 
                 const card = document.createElement('div');
                 card.className = 'card-book';
-                card.onclick = (e) => {
-                    if(e.target.closest('.book-menu-btn')) return;
-                    openVocabDetail(idx);
-                };
-
+                card.onclick = (e) => { if(!e.target.closest('.book-menu-btn')) openVocabDetail(idx); };
                 card.innerHTML = `
-                    <div class="book-header">
-                        <span class="book-tag">English / Korean</span>
-                        <button class="book-menu-btn" onclick="openBookMenuSheet(${idx})">${icons.menu}</button>
-                    </div>
+                    <div class="book-header"><span class="book-tag">English / Korean</span><button class="book-menu-btn" onclick="openBookMenuSheet(${idx})">${icons.menu}</button></div>
                     <h3 class="book-title">${v.vocabulary.name}</h3>
                     <div class="book-footer">
                         <div class="book-stats">
                             <div class="stat-item blue">${icons.list} <span>${total}</span></div>
                             <div class="stat-item pink-text">${icons.paw} <span>${memorized}</span></div>
                         </div>
-                        <div class="circle-chart" style="${chartStyle}">
-                            <div class="circle-inner"><span class="circle-text">${percent}%</span></div>
-                        </div>
+                        <div class="circle-chart" style="${chartStyle}"><div class="circle-inner"><span class="circle-text">${percent}%</span></div></div>
                     </div>
                 `;
                 listDiv.appendChild(card);
             });
         }
 
-        function handleTopPlus() {
-            if (isDetailView) openWordForm();
-            else openAddMenuSheet();
-        }
-
-        function openVocabDetail(idx) {
-            currentVocabIdx = idx;
-            isDetailView = true;
-            activeFilters.clear(); activeFilters.add('all');
-            maskingMode = 'none';
-            switchPageWithAnim('tab-voca', 'voca-detail');
-            document.getElementById('backBtn').style.display = 'flex';
-            document.getElementById('exportBtnTop').style.display = 'flex';
-            document.getElementById('fabContainer').style.display = 'flex';
-            document.getElementById('searchInput').placeholder = "이 단어장에서 검색";
-            document.getElementById('mainLogo').style.display = 'none';
-            document.querySelector('.bottom-nav').classList.add('hidden');
-            renderWords();
-        }
-
-        function renderWords() {
-            const container = document.getElementById('wordContainer');
-            container.innerHTML = '';
-            const v = savedVocabs[currentVocabIdx];
-            let hasWord = false;
-
-            const titleDiv = document.createElement('h2');
-            titleDiv.style.margin = "0 0 16px 4px";
-            titleDiv.style.fontSize = "22px";
-            titleDiv.innerText = v.vocabulary.name;
-            container.appendChild(titleDiv);
-
-            v.corpusList.forEach((w, wIdx) => {
-                const status = w.status !== undefined ? w.status : 0;
-                if (!activeFilters.has('all') && !activeFilters.has(status)) return;
-                
-                hasWord = true;
-                let displayMeaning = Array.isArray(w.meaning) ? w.meaning.join(', ') : w.meaning;
-
-                const wordClass = maskingMode === 'word' ? 'word-eng masked' : 'word-eng';
-                const meanClass = maskingMode === 'meaning' ? 'word-kor masked' : 'word-kor';
-
-                const card = document.createElement('div');
-                card.className = 'card-word';
-                
-                card.innerHTML = `
-                    <div onclick="toggleStatus(${wIdx}, this.nextElementSibling)">
-                        <div class="word-row">
-                            <span class="${wordClass}" onclick="this.classList.remove('masked'); event.stopPropagation();">${w.word}</span>
-                            <button class="tts-btn" onclick="speak('${w.word.replace(/'/g, "\\'")}'); event.stopPropagation();">
-                                ${icons.speaker}
-                            </button>
-                        </div>
-                        <span class="${meanClass}" onclick="this.classList.remove('masked'); event.stopPropagation();">${displayMeaning}</span>
-                    </div>
-                    
-                    <div class="status-check checked-${status}" onclick="toggleStatus(${wIdx}, this)"></div>
-                    <button class="word-edit-btn" onclick="openWordForm(${wIdx})">편집</button>
-                `;
-                container.appendChild(card);
-            });
-
-            if(!hasWord) {
-                const empty = document.createElement('div');
-                empty.style.textAlign = 'center'; empty.style.color = 'var(--text-gray)';
-                empty.style.marginTop = '50px'; empty.innerText = '해당하는 단어가 없습니다.';
-                container.appendChild(empty);
-            }
-        }
-
-        function speak(text) {
-            if(!window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
-            const u = new SpeechSynthesisUtterance(text);
-            u.lang = 'en-US';
-            u.rate = 1.0; 
-            window.speechSynthesis.speak(u);
-        }
-
-        function toggleStatus(wIdx, divEl) {
-            if(!divEl.classList.contains('status-check')) return;
-            const v = savedVocabs[currentVocabIdx];
-            let currentStatus = v.corpusList[wIdx].status || 0;
-            let nextStatus = currentStatus === 0 ? 2 : (currentStatus === 2 ? 1 : 0);
-
-            v.corpusList[wIdx].status = nextStatus;
-            saveAndRefresh(false);
-            
-            if(!activeFilters.has('all')) renderWords();
-            else divEl.className = `status-check checked-${nextStatus}`;
-
-            let msg = "";
-            if (nextStatus === 2) msg = "암기됨으로 체크되었습니다";
-            else if (nextStatus === 1) msg = "미암기로 체크되었습니다";
-            else msg = "해당없음으로 체크되었습니다";
-            showToast(msg);
-        }
-
-        function closeVocabDetail() {
-            isDetailView = false; maskingMode = 'none';
-            closeAllBottomSheets();
-            switchPageWithAnim('voca-detail', 'tab-voca');
-            document.getElementById('backBtn').style.display = 'none';
-            document.getElementById('exportBtnTop').style.display = 'none';
-            document.getElementById('fabContainer').style.display = 'none';
-            document.getElementById('searchInput').placeholder = "단어 검색";
-            document.getElementById('mainLogo').style.display = 'block';
-            document.querySelector('.bottom-nav').classList.remove('hidden');
-            renderList();
-        }
-
-        function openVocabForm(idx = -1) {
-            currentVocabIdx = idx;
-            document.getElementById('v_name').value = idx > -1 ? savedVocabs[idx].vocabulary.name : '';
-            openModalWithAnim('vocabForm');
-        }
-
-        function saveVocab() {
-            const name = document.getElementById('v_name').value;
-            if(!name) return;
-            if(currentVocabIdx > -1) savedVocabs[currentVocabIdx].vocabulary.name = name;
-            else savedVocabs.push({vocabulary:{name:name}, corpusList:[]});
-            saveAndRefresh(); closeModalWithAnim('vocabForm');
-        }
-
-        function deleteVocab(idx) {
-            if(confirm('이 단어장을 삭제할까요?')) {
-                savedVocabs.splice(idx, 1);
-                saveAndRefresh();
-            }
-        }
-
-        function addMeaningInput(val = '') {
-            const container = document.getElementById('meaningsContainer');
-            const div = document.createElement('div');
-            div.className = 'meaning-row';
-            div.innerHTML = `<input type="text" class="meaning-input" placeholder="뜻" value="${val}"><button class="btn-remove" onclick="this.parentElement.remove()">-</button>`;
-            container.appendChild(div);
-        }
-
-        function openWordForm(wIdx = -1) {
-            currentWordIdx = wIdx;
-            document.getElementById('delWordBtn').style.display = wIdx > -1 ? 'block' : 'none';
-            const container = document.getElementById('meaningsContainer');
-            container.innerHTML = ''; 
-            if(wIdx > -1) {
-                const w = savedVocabs[currentVocabIdx].corpusList[wIdx];
-                document.getElementById('w_word').value = w.word;
-                let meanings = Array.isArray(w.meaning) ? w.meaning : (w.meaning ? [w.meaning] : []);
-                if(meanings.length > 0) meanings.forEach(m => addMeaningInput(m));
-                else addMeaningInput();
-            } else {
-                document.getElementById('w_word').value = '';
-                addMeaningInput();
-            }
-            openModalWithAnim('wordForm');
-        }
-
-        async function fetchMeaning() {
-            const word = document.getElementById('w_word').value;
-            if(!word) return;
-            const btn = document.getElementById('findBtn');
-            btn.innerText = '검색 중...';
-            try {
-                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ko&dt=t&dt=bd&q=${encodeURIComponent(word)}`);
-                const data = await res.json();
-                let foundMeanings = [];
-                if (data[1]) {
-                    data[1].forEach(pos => { if(pos[1] && Array.isArray(pos[1])) foundMeanings.push(...pos[1]); });
+        // 불러오기 핵심 로직 수정
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                const jsonMatch = content.match(/\{.*\}/s); // 파일 내 JSON 패턴 추출
+                if(jsonMatch) {
+                    try {
+                        const data = JSON.parse(jsonMatch[0]);
+                        // 유효성 검사: vocabulary와 corpusList가 있는지 확인
+                        if(data.vocabulary && Array.isArray(data.corpusList)) {
+                            // 상태(status) 정보가 없으면 0으로 초기화
+                            data.corpusList = data.corpusList.map(item => ({
+                                ...item,
+                                status: item.status !== undefined ? item.status : 0
+                            }));
+                            savedVocabs.push(data);
+                            saveAndRefresh();
+                            showToast('단어장을 불러왔습니다.');
+                        } else {
+                            alert('올바른 단어장 형식이 아닙니다.');
+                        }
+                    } catch(err) {
+                        alert('파일 읽기 오류: 형식이 잘못되었습니다.');
+                    }
+                } else {
+                    alert('파일 내에서 데이터를 찾을 수 없습니다.');
                 }
-                foundMeanings = [...new Set(foundMeanings)];
-                if(foundMeanings.length === 0 && data[0] && data[0][0] && data[0][0][0]) foundMeanings.push(data[0][0][0]);
-                const finalMeanings = foundMeanings.slice(0, 3);
-                const container = document.getElementById('meaningsContainer');
-                container.innerHTML = ''; 
-                if(finalMeanings.length > 0) finalMeanings.forEach(m => addMeaningInput(m));
-                else { alert('뜻을 찾지 못했습니다.'); addMeaningInput(); }
-            } catch(e) { alert('검색 실패 (네트워크 오류)'); addMeaningInput(); }
-            btn.innerText = '뜻 자동 완성 (Google)';
-        }
-
-        function saveWord() {
-            const word = document.getElementById('w_word').value;
-            const meaningInputs = document.querySelectorAll('.meaning-input');
-            const meanings = [];
-            meaningInputs.forEach(input => { if(input.value.trim()) meanings.push(input.value.trim()); });
-            if(!word || meanings.length === 0) { alert('단어와 최소 하나의 뜻을 입력해주세요.'); return; }
-            let existingStatus = 0;
-            if(currentWordIdx > -1) existingStatus = savedVocabs[currentVocabIdx].corpusList[currentWordIdx].status || 0;
-            const newWordObj = {word, meaning: meanings, status: existingStatus};
-            if(currentWordIdx > -1) savedVocabs[currentVocabIdx].corpusList[currentWordIdx] = newWordObj;
-            else savedVocabs[currentVocabIdx].corpusList.push(newWordObj);
-            saveAndRefresh(false); renderWords(); closeModalWithAnim('wordForm');
-        }
-
-        function deleteWord() {
-            savedVocabs[currentVocabIdx].corpusList.splice(currentWordIdx, 1);
-            saveAndRefresh(false); renderWords(); closeModalWithAnim('wordForm');
+                event.target.value = ''; // 같은 파일 재선택 가능하게 초기화
+            };
+            reader.readAsText(file);
         }
 
         function saveAndRefresh(shouldRenderList = true) {
@@ -931,111 +534,179 @@
             if(shouldRenderList) renderList();
         }
 
-        function handleImport(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const match = e.target.result.match(/\{.*\}/s);
-                if(match) {
-                    try {
-                        const data = JSON.parse(match[0]);
-                        data.corpusList = data.corpusList.map(i => ({...i, status: i.status || 0}));
-                        savedVocabs.push(data);
-                        saveAndRefresh();
-                    } catch(err) { alert('파일 형식 오류'); }
-                }
-            };
-            reader.readAsText(file);
+        // --- 기타 UI 및 기능 함수들 ---
+        function handleTopPlus() { if (isDetailView) openWordForm(); else openAddMenuSheet(); }
+        function openVocabForm(idx = -1) { currentVocabIdx = idx; document.getElementById('v_name').value = idx > -1 ? savedVocabs[idx].vocabulary.name : ''; openModalWithAnim('vocabForm'); }
+        function saveVocab() {
+            const name = document.getElementById('v_name').value;
+            if(!name) return;
+            if(currentVocabIdx > -1) savedVocabs[currentVocabIdx].vocabulary.name = name;
+            else savedVocabs.push({vocabulary:{name:name}, corpusList:[]});
+            saveAndRefresh(); closeModalWithAnim('vocabForm');
         }
+        function openAddMenuSheet() { document.getElementById('menuOverlay').classList.add('active'); document.getElementById('addMenuSheet').classList.add('active'); }
+        function openBookMenuSheet(idx) { contextVocabIdx = idx; document.getElementById('bookMenuTitle').innerText = savedVocabs[idx].vocabulary.name; document.getElementById('menuOverlay').classList.add('active'); document.getElementById('bookMenuSheet').classList.add('active'); }
+        function openExportModal(idx = -1) { if(idx > -1) contextVocabIdx = idx; else if(currentVocabIdx > -1) contextVocabIdx = currentVocabIdx; closeAllBottomSheets(); setTimeout(() => { document.getElementById('menuOverlay').classList.add('active'); document.getElementById('exportSheet').classList.add('active'); }, 100); }
+        function deleteVocab(idx) { if(confirm('이 단어장을 삭제할까요?')) { savedVocabs.splice(idx, 1); saveAndRefresh(); } }
+        
+        function openVocabDetail(idx) {
+            currentVocabIdx = idx; isDetailView = true; activeFilters.clear(); activeFilters.add('all'); maskingMode = 'none';
+            switchPageWithAnim('tab-voca', 'voca-detail');
+            document.getElementById('backBtn').style.display = 'flex';
+            document.getElementById('exportBtnTop').style.display = 'flex';
+            document.getElementById('fabContainer').style.display = 'flex';
+            document.getElementById('mainLogo').style.display = 'none';
+            document.querySelector('.bottom-nav').classList.add('hidden');
+            renderWords();
+        }
+
+        function closeVocabDetail() {
+            isDetailView = false; switchPageWithAnim('voca-detail', 'tab-voca');
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('exportBtnTop').style.display = 'none';
+            document.getElementById('fabContainer').style.display = 'none';
+            document.getElementById('mainLogo').style.display = 'block';
+            document.querySelector('.bottom-nav').classList.remove('hidden');
+            renderList();
+        }
+
+        function renderWords() {
+            const container = document.getElementById('wordContainer');
+            container.innerHTML = '';
+            const v = savedVocabs[currentVocabIdx];
+            const titleDiv = document.createElement('h2');
+            titleDiv.style.margin = "0 0 16px 4px"; titleDiv.innerText = v.vocabulary.name;
+            container.appendChild(titleDiv);
+
+            v.corpusList.forEach((w, wIdx) => {
+                const status = w.status || 0;
+                if (!activeFilters.has('all') && !activeFilters.has(status)) return;
+                let displayMeaning = Array.isArray(w.meaning) ? w.meaning.join(', ') : w.meaning;
+                const wordClass = maskingMode === 'word' ? 'word-eng masked' : 'word-eng';
+                const meanClass = maskingMode === 'meaning' ? 'word-kor masked' : 'word-kor';
+                const card = document.createElement('div');
+                card.className = 'card-word';
+                card.innerHTML = `
+                    <div onclick="toggleStatus(${wIdx}, this.nextElementSibling)">
+                        <div class="word-row"><span class="${wordClass}">${w.word}</span><button class="tts-btn" onclick="speak('${w.word}'); event.stopPropagation();">${icons.speaker}</button></div>
+                        <span class="${meanClass}">${displayMeaning}</span>
+                    </div>
+                    <div class="status-check checked-${status}" onclick="toggleStatus(${wIdx}, this)"></div>
+                    <button class="word-edit-btn" onclick="openWordForm(${wIdx})">편집</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleStatus(wIdx, divEl) {
+            const v = savedVocabs[currentVocabIdx];
+            let next = (v.corpusList[wIdx].status || 0) === 0 ? 2 : (v.corpusList[wIdx].status === 2 ? 1 : 0);
+            v.corpusList[wIdx].status = next;
+            saveAndRefresh(false); renderWords();
+        }
+
+        function speak(text) { if(!window.speechSynthesis) return; const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; window.speechSynthesis.speak(u); }
+
+        function openWordForm(wIdx = -1) {
+            currentWordIdx = wIdx; document.getElementById('delWordBtn').style.display = wIdx > -1 ? 'block' : 'none';
+            const container = document.getElementById('meaningsContainer'); container.innerHTML = ''; 
+            if(wIdx > -1) {
+                const w = savedVocabs[currentVocabIdx].corpusList[wIdx];
+                document.getElementById('w_word').value = w.word;
+                let ms = Array.isArray(w.meaning) ? w.meaning : [w.meaning];
+                ms.forEach(m => addMeaningInput(m));
+            } else { document.getElementById('w_word').value = ''; addMeaningInput(); }
+            openModalWithAnim('wordForm');
+        }
+
+        function addMeaningInput(val = '') {
+            const container = document.getElementById('meaningsContainer');
+            const div = document.createElement('div'); div.className = 'meaning-row';
+            div.innerHTML = `<input type="text" class="meaning-input" placeholder="뜻" value="${val}"><button class="btn-remove" onclick="this.parentElement.remove()">-</button>`;
+            container.appendChild(div);
+        }
+
+        async function fetchMeaning() {
+            const word = document.getElementById('w_word').value; if(!word) return;
+            document.getElementById('findBtn').innerText = '검색 중...';
+            try {
+                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ko&dt=t&q=${encodeURIComponent(word)}`);
+                const data = await res.json();
+                if(data[0][0][0]) {
+                    document.getElementById('meaningsContainer').innerHTML = '';
+                    addMeaningInput(data[0][0][0]);
+                }
+            } catch(e) { alert('검색 실패'); }
+            document.getElementById('findBtn').innerText = '뜻 자동 완성 (Google)';
+        }
+
+        function saveWord() {
+            const word = document.getElementById('w_word').value;
+            const ms = []; document.querySelectorAll('.meaning-input').forEach(i => { if(i.value.trim()) ms.push(i.value.trim()); });
+            if(!word || ms.length === 0) return;
+            const obj = {word, meaning: ms, status: currentWordIdx > -1 ? savedVocabs[currentVocabIdx].corpusList[currentWordIdx].status : 0};
+            if(currentWordIdx > -1) savedVocabs[currentVocabIdx].corpusList[currentWordIdx] = obj;
+            else savedVocabs[currentVocabIdx].corpusList.push(obj);
+            saveAndRefresh(false); renderWords(); closeModalWithAnim('wordForm');
+        }
+
+        function deleteWord() { savedVocabs[currentVocabIdx].corpusList.splice(currentWordIdx, 1); saveAndRefresh(false); renderWords(); closeModalWithAnim('wordForm'); }
 
         async function handleExportAction(type) {
             closeAllBottomSheets();
             const data = savedVocabs[contextVocabIdx];
             const content = JSON.stringify(data, null, 2);
-            const fileName = `${data.vocabulary.name}.txt`; // 호환성을 위해 .txt
-
             if (type === 'save') {
                 const blob = new Blob([content], {type: 'text/plain'});
                 const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = `${data.vocabulary.name}.doc`; // 저장은 .doc 권장
-                a.click();
+                const a = document.createElement('a'); a.href = url; a.download = `${data.vocabulary.name}.doc`; a.click();
             } else if (type === 'share') {
-                if (!window.isSecureContext) {
-                    alert('공유 기능은 보안 연결(HTTPS) 또는 localhost에서만 작동합니다.\n현재 환경에서는 "파일로 저장"을 이용해주세요.');
-                    return;
-                }
                 try {
-                    const blob = new Blob([content], {type: 'text/plain'});
-                    const file = new File([blob], fileName, { type: 'text/plain' });
-
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({
-                            files: [file],
-                            title: data.vocabulary.name,
-                            text: '단어장 파일입니다.'
-                        });
-                    } else {
-                        await navigator.clipboard.writeText(content);
-                        alert('이 기기/브라우저는 파일 공유를 지원하지 않습니다.\n데이터가 클립보드에 복사되었습니다.');
-                    }
-                } catch (error) {
-                    console.error('Sharing failed', error);
-                    if (error.name !== 'AbortError') alert('공유에 실패했습니다. "파일로 저장"을 이용해주세요.');
+                    await navigator.share({ title: data.vocabulary.name, text: content });
+                } catch (e) {
+                    navigator.clipboard.writeText(content); alert('클립보드에 복사되었습니다.');
                 }
             }
         }
 
         function switchTab(tab, el) {
-            const currentTab = document.querySelector('.page.active');
-            const targetTabId = 'tab-' + tab;
-            
-            // 애니메이션
-            document.querySelectorAll('.nav-item').forEach(n => {
-                n.classList.remove('active');
-                n.classList.remove('animate');
-            });
-            el.classList.add('active');
-            void el.offsetWidth; 
-            el.classList.add('animate');
-
-            // 친구 탭 특별 처리
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'animate'));
+            el.classList.add('active', 'animate');
+            const target = 'tab-' + tab;
             const topBar = document.querySelector('.top-bar');
             const container = document.querySelector('.container');
             const iframe = document.getElementById('chatIframe');
 
             if (tab === 'friends') {
-                topBar.classList.add('hide-bar');
-                document.body.classList.add('friends-mode');
-                container.classList.add('friends-mode');
+                topBar.classList.add('hide-bar'); document.body.classList.add('friends-mode'); container.classList.add('friends-mode');
                 if(!iframe.src) iframe.src = "https://wordvoca.kro.kr/chat";
             } else {
-                topBar.classList.remove('hide-bar');
-                document.body.classList.remove('friends-mode');
-                container.classList.remove('friends-mode');
+                topBar.classList.remove('hide-bar'); document.body.classList.remove('friends-mode'); container.classList.remove('friends-mode');
             }
-
-            if(currentTab && currentTab.id === targetTabId) return;
             if (isDetailView) closeVocabDetail();
-            
-            if (currentTab) switchPageWithAnim(currentTab.id, targetTabId);
-            else document.getElementById(targetTabId).classList.add('active', 'show');
+            document.querySelectorAll('.page').forEach(p => { p.classList.remove('active', 'show'); if(p.id === target) p.classList.add('active', 'show'); });
         }
 
         function handleSearch() {
             const q = document.getElementById('searchInput').value.toLowerCase();
-            if(isDetailView) {
-                 document.querySelectorAll('.card-word').forEach(el => {
-                    el.style.display = el.innerText.toLowerCase().includes(q) ? '' : 'none';
-                });
-            } else {
-                document.querySelectorAll('.card-book').forEach(el => {
-                    el.style.display = el.innerText.toLowerCase().includes(q) ? '' : 'none';
-                });
-            }
+            const selector = isDetailView ? '.card-word' : '.card-book';
+            document.querySelectorAll(selector).forEach(el => { el.style.display = el.innerText.toLowerCase().includes(q) ? '' : 'none'; });
         }
 
-        renderList();
+        function toggleFilter(f) {
+            if(f === 'all') { activeFilters.clear(); activeFilters.add('all'); }
+            else { activeFilters.has('all') && activeFilters.delete('all'); activeFilters.has(f) ? activeFilters.delete(f) : activeFilters.add(f); if(activeFilters.size===0) activeFilters.add('all'); }
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+            activeFilters.forEach(v => { const e = document.getElementById('filter-'+v); if(e) e.classList.add('selected'); });
+            renderWords();
+        }
+
+        function setMasking(m) {
+            maskingMode = m; document.querySelectorAll('#mask-none, #mask-word, #mask-meaning').forEach(c => c.classList.remove('selected'));
+            document.getElementById('mask-'+m).classList.add('selected'); renderWords();
+        }
+
+        function openViewSettings() { document.getElementById('menuOverlay').classList.add('active'); document.getElementById('viewSettingsSheet').classList.add('active'); }
     </script>
 </body>
 </html>
