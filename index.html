@@ -935,60 +935,14 @@
             const file = event.target.files[0];
             const reader = new FileReader();
             reader.onload = (e) => {
-                const content = e.target.result;
-                
-                // 1. 기존 JSON 포맷 시도
-                const jsonMatch = content.match(/\{.*\}/s);
-                if(jsonMatch) {
+                const match = e.target.result.match(/\{.*\}/s);
+                if(match) {
                     try {
-                        const data = JSON.parse(jsonMatch[0]);
-                        // JSON 구조 확인 (corpusList가 있는지)
-                        if(data.corpusList) {
-                            data.corpusList = data.corpusList.map(i => ({...i, status: i.status || 0}));
-                            savedVocabs.push(data);
-                            saveAndRefresh();
-                            return; 
-                        }
-                    } catch(err) { 
-                        // JSON 파싱 실패시 아래 텍스트 파싱 로직으로 이동
-                    }
-                }
-
-                // 2. 35-36.doc (파이썬 리스트 튜플 형태) 파싱 로직 추가
-                try {
-                    // 불필요한 메타데이터 태그 제거 
-                    let cleanText = content.replace(/\/g, '');
-                    // 줄바꿈을 공백으로 변경 (단어/뜻이 줄바꿈으로 끊겨있을 경우 연결)
-                    cleanText = cleanText.replace(/[\r\n]+/g, ' ');
-                    
-                    const newWords = [];
-                    // ("영어", "뜻") 패턴 찾기
-                    const regex = /\("([^"]+)"\s*,\s*"([^"]+)"\)/g;
-                    let match;
-                    
-                    while ((match = regex.exec(cleanText)) !== null) {
-                        const w = match[1].trim();
-                        const m = match[2].trim();
-                        if(w && m) {
-                            newWords.push({word: w, meaning: m, status: 0});
-                        }
-                    }
-
-                    if(newWords.length > 0) {
-                        const newVocab = {
-                            vocabulary: { name: file.name.replace(/\.[^/.]+$/, "") },
-                            corpusList: newWords
-                        };
-                        savedVocabs.push(newVocab);
+                        const data = JSON.parse(match[0]);
+                        data.corpusList = data.corpusList.map(i => ({...i, status: i.status || 0}));
+                        savedVocabs.push(data);
                         saveAndRefresh();
-                        alert(newWords.length + '개의 단어를 불러왔습니다.');
-                    } else {
-                        alert('파일 형식을 인식할 수 없습니다.');
-                    }
-
-                } catch (err) {
-                    alert('파일 불러오기 중 오류가 발생했습니다.');
-                    console.error(err);
+                    } catch(err) { alert('파일 형식 오류'); }
                 }
             };
             reader.readAsText(file);
