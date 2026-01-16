@@ -207,16 +207,15 @@
         .page.active { display: block; } 
         .page.show { opacity: 1; transform: translateY(0); }
         
-        /* [수정] 채팅 탭: position fixed로 하단바 위까지만 오도록 강제 고정 */
+        /* 채팅 탭 */
         #tab-friends {
-            position: fixed; /* 뷰포트 기준 고정 */
+            position: fixed; 
             top: 0; 
             left: 0; 
             width: 100%;
-            /* 하단바 높이(80px)를 뺀 나머지 공간만 차지하도록 설정 */
             bottom: 80px; 
-            height: auto; /* bottom 속성으로 높이 결정 */
-            z-index: 1000; /* 하단바(2000)보다 아래, 내용물보다는 위 */
+            height: auto; 
+            z-index: 1000; 
             background: white;
             padding: 0;
             margin: 0;
@@ -443,7 +442,7 @@
 
     <div class="container">
         <div id="tab-voca" class="page active show">
-            <input type="file" id="fileInput" accept=".doc,.json,.txt" style="display:none" onchange="handleImport(event)">
+            <input type="file" id="fileInput" accept=".doc,.json,.txt,.csv" style="display:none" onchange="handleImport(event)">
             <div id="vocabList"></div>
         </div>
 
@@ -520,8 +519,14 @@
             <span>내보내기</span>
             <button onclick="closeAllBottomSheets()" style="border:none; background:none; font-size:16px; color:var(--accent-blue); font-weight:600;">취소</button>
         </div>
-        <button class="menu-btn-sheet" onclick="handleExportAction('share')">공유하기 / 링크 복사 (PC)</button>
-        <button class="menu-btn-sheet" onclick="handleExportAction('save')">파일로 저장</button>
+        
+        <div class="sheet-section-title">기본 형식 (앱 전용)</div>
+        <button class="menu-btn-sheet" onclick="handleExportAction('share', 'json')">공유하기 / 텍스트 복사</button>
+        <button class="menu-btn-sheet" onclick="handleExportAction('save', 'json')">파일로 저장 (.doc)</button>
+
+        <div class="sheet-section-title">CSV 형식 (엑셀 호환)</div>
+        <button class="menu-btn-sheet" onclick="handleExportAction('save', 'csv')">CSV로 저장 (.csv)</button>
+        <button class="menu-btn-sheet" onclick="handleExportAction('share', 'csv')">CSV로 공유</button>
     </div>
 
     <div class="bottom-nav">
@@ -642,7 +647,6 @@
 
         let savedVocabs = JSON.parse(localStorage.getItem('myVocabs') || '[]');
         
-        // [수정] 내장 데이터가 없으면 강제로 추가
         const initialName = initialData.vocabulary.name;
         if (!savedVocabs.some(v => v.vocabulary.name === initialName)) {
             savedVocabs.push(initialData);
@@ -1008,7 +1012,6 @@
             if(shouldRenderList) renderList();
         }
 
-        // [수정] 파일 가져오기 기능 대폭 강화
         function handleImport(event) {
             const file = event.target.files[0];
             const reader = new FileReader();
@@ -1016,7 +1019,6 @@
                 const content = e.target.result;
                 let data = null;
 
-                // 1. JSON 파싱 시도
                 try {
                     const match = content.match(/\{.*\}/s);
                     if(match) {
@@ -1027,18 +1029,15 @@
                     data = null;
                 }
 
-                // 2. 실패 시 강제 텍스트 추출 (영어...한글 패턴 인식)
                 if (!data) {
                     const lines = content.split('\n');
                     const extracted = [];
-                    // 영단어(시작) ... 한글(끝) 형태의 라인을 찾음
                     lines.forEach(line => {
                         const regex = /([a-zA-Z][a-zA-Z\s\-]*)[\s:;\t\-\=]+(.*[가-힣].*)/;
                         const match = line.match(regex);
                         if (match) {
                             const w = match[1].trim();
                             const mStr = match[2].trim();
-                            // 구분자로 뜻 분리
                             const m = mStr.split(/[,;]+/).map(s => s.trim()).filter(s=>s);
                             if(w && m.length > 0) {
                                 extracted.push({ word: w, meaning: m, status: 0 });
@@ -1058,7 +1057,6 @@
                 }
 
                 if (data) {
-                    // status 필드 보정
                     if(data.corpusList) {
                         data.corpusList = data.corpusList.map(i => ({...i, status: i.status || 0}));
                     }
@@ -1072,17 +1070,39 @@
             reader.readAsText(file);
         }
 
-        async function handleExportAction(type) {
+        async function handleExportAction(type, format = 'json') {
             closeAllBottomSheets();
             const data = savedVocabs[contextVocabIdx];
-            const content = JSON.stringify(data, null, 2);
-            const fileName = `${data.vocabulary.name}.txt`; // 호환성을 위해 .txt
+            
+            let content = "";
+            let fileName = data.vocabulary.name;
+            let mimeType = 'text/plain';
+
+            if (format === 'csv') {
+                // CSV 포맷 생성 (W,M,POS,S,A,D)
+                content = "W,M,POS,S,A,D\n";
+                data.corpusList.forEach(w => {
+                    const meanings = Array.isArray(w.meaning) ? w.meaning.join(', ') : w.meaning;
+                    // 뜻에 쉼표나 따옴표가 있으면 엑셀을 위해 따옴표로 감싸야 함
+                    const safeMeanings = meanings.includes(',') || meanings.includes('"') 
+                        ? `"${meanings.replace(/"/g, '""')}"` 
+                        : meanings;
+                    content += `${w.word},${safeMeanings},,,,\n`;
+                });
+                fileName += ".csv";
+                mimeType = 'text/csv';
+            } else {
+                // 기존 JSON 포맷
+                content = JSON.stringify(data, null, 2);
+                fileName += ".doc"; 
+            }
 
             if (type === 'save') {
-                const blob = new Blob([content], {type: 'text/plain'});
+                const blob = new Blob([content], {type: mimeType});
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url; a.download = `${data.vocabulary.name}.doc`; // 저장은 .doc 권장
+                a.href = url; 
+                a.download = fileName;
                 a.click();
             } else if (type === 'share') {
                 if (!window.isSecureContext) {
@@ -1090,8 +1110,8 @@
                     return;
                 }
                 try {
-                    const blob = new Blob([content], {type: 'text/plain'});
-                    const file = new File([blob], fileName, { type: 'text/plain' });
+                    const blob = new Blob([content], {type: mimeType});
+                    const file = new File([blob], fileName, { type: mimeType });
 
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         await navigator.share({
